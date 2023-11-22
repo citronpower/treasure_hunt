@@ -35,3 +35,6 @@ treasure_hunt-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# PyCharm
+/.idea/
+

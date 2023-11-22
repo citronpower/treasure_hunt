@@ -5,6 +5,8 @@ defmodule TreasureHunt.Application do
 
   use Application
 
+  #@players []#%{}
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -16,7 +18,8 @@ defmodule TreasureHunt.Application do
       # Start a worker by calling: TreasureHunt.Worker.start_link(arg)
       # {TreasureHunt.Worker, arg},
       # Start to serve requests, typically the last entry
-      TreasureHuntWeb.Endpoint
+      TreasureHuntWeb.Endpoint,
+      {TreasureHunt.PlayerManager, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -32,4 +35,23 @@ defmodule TreasureHunt.Application do
     TreasureHuntWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+#  def get_players() do
+#    @players
+#  end
+#
+#  def add_player(player_name) do
+#    case player_name in @players do #case Map.get(@players, player_name) do
+#      false ->
+#        #TreasureHunt.Application.add_player(player_name)
+#        IO.puts("I am here")
+#        IO.puts(inspect(@players))
+#        @players = @players ++ [player_name]
+#        IO.puts("New player #{player_name} joined the game!")
+#        IO.puts(inspect(@players))
+#      true ->
+#        IO.puts("Player #{player_name} already exist!")
+#    end
+#
+#  end
 end

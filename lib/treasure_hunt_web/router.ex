@@ -17,7 +17,12 @@ defmodule TreasureHuntWeb.Router do
   scope "/", TreasureHuntWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    #get "/", PageController, :home
+	  get "/", PageController, :join
+    get "/join", PageController, :join
+    post "/register", PageController, :register
+#	  get "/hello", PageController, :index
+#	  get "/hello/:messenger", PageController, :show
   end
 
   # Other scopes may use custom stacks.
