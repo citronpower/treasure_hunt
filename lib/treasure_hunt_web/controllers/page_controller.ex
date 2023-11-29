@@ -12,10 +12,14 @@ defmodule TreasureHuntWeb.PageController do
 #  end
 
   def load_player(conn, player_name) do
-    score = TreasureHunt.PlayerManager.get_player(player_name)
+    #code = TreasureHunt.PlayerManager.get_player(player_name)
+    players = TreasureHunt.PlayerManager.get_players() |>
+        Map.delete(player_name)
+
+    IO.puts(inspect(players))
     conn
         |> put_flash(:info, "Welcome to the treasure hunt #{player_name}!")
-        |> assign(:score, score)
+        |> assign(:players, players)
         |> assign(:player_name, player_name)
         |> render("index.html")
   end
@@ -37,11 +41,13 @@ defmodule TreasureHuntWeb.PageController do
   def register(conn, %{"player_name" => player_name}) do
     players = TreasureHunt.PlayerManager.get_players()#TreasureHunt.Application.get_players()
 
-    if ! player_name in players do TreasureHunt.PlayerManager.add_player(player_name) end
-    conn
+    if ! player_name in players do
+      TreasureHunt.PlayerManager.add_player(player_name)
+    end
+    #conn
 
     load_player(conn |>
-      put_resp_cookie("player", %{player_name: player_name}, max_age: 3600, encrypt: true),
+      put_resp_cookie("player", %{player_name: player_name}, max_age: 36000, encrypt: true),
       player_name)
   end
   

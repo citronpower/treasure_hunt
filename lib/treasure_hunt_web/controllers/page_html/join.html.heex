@@ -4,7 +4,8 @@
 
 
 <.simple_form :let={f} for={@conn} action={~p"/register"}>
-    <%= label f, :player_name %>
+    <!--<%= label f, :player_name %>-->
+    <label for="player_name">How should I call you?</label>
     <%= text_input f, :player_name, placeholder: "Enter your player name", required: true, class: "form-control" %>
     <:actions>
       <.button phx_disable_with="Joining..." class="btn btn-primary">Join</.button>

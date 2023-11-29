@@ -1,5 +1,41 @@
-<h2>Welcome in the game server!</h2>
+<h1>Welcome in the game server!</h1>
 
-<p><%= @player_name %> have successfully joined the game server.</p>
+<p><%= @player_name %> has successfully joined the game server.</p>
 
-<p>Score: <%= inspect(@score) %>!</p>
+<.simple_form :let={f} for={@conn} action={~p"/claim"}>
+
+    <label for="player_name">Wanna try to open our chest?</label>
+    <!--<div class="input-group">-->
+    <%= text_input f, :player_name, placeholder: "Your code", required: true, class: "form-control" %>
+    <:actions>
+      <.button phx_disable_with="Joining..." class="btn btn-primary" type="submit">
+        <i class="fas fa-check"></i>
+      </.button>
+    </:actions>
+    <!--</div>-->
+  </.simple_form>
+
+
+<h3>Player list:</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Player</th>
+      <th>Code</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for {key, value} <- @players do %>
+      <tr>
+        <td><%= key %></td>
+        <td><%= value %></td>
+        <td>
+          <button class="challenge-button">
+            <i class="fa-solid fa-dungeon"></i>
+          </button>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
