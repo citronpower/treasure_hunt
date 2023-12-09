@@ -21,7 +21,9 @@ defmodule TreasureHuntWeb.Router do
 	  get "/", PageController, :join
     get "/join", PageController, :join
     post "/register", PageController, :register
+    live "/light", LightLive
 #	  get "/hello", PageController, :index
+    live "/game", GameArea
 #	  get "/hello/:messenger", PageController, :show
   end
 

@@ -8,6 +8,7 @@ defmodule TreasureHunt.PlayerManager do
   def add_player(player_name) do
     random_number = :rand.uniform(9000) + 1000
     Agent.update(__MODULE__, &(Map.put(&1, player_name, random_number)))
+    get_players()
   end
 
   def get_players() do
@@ -17,4 +18,6 @@ defmodule TreasureHunt.PlayerManager do
   def get_player(player) do
     Agent.get(__MODULE__, &(Map.get(&1, player)))
   end
+
+
 end

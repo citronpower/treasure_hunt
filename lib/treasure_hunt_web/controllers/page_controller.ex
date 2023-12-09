@@ -23,6 +23,7 @@ defmodule TreasureHuntWeb.PageController do
         |> assign(:players, players)
         |> assign(:player_name, player_name)
         |> render("index.html")
+        #|> live_render(TreasureHuntWeb.GameArea)
   end
 
   def join(conn, _params) do
@@ -49,6 +50,10 @@ defmodule TreasureHuntWeb.PageController do
     load_player(conn |>
       put_resp_cookie("player", %{player_name: player_name}, max_age: 36000, encrypt: true),
       player_name)
+  end
+
+  def add_product(conn, test) do
+    IO.puts(test)
   end
 
     #load_player(conn |>

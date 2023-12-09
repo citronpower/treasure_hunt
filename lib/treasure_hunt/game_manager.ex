@@ -3,12 +3,17 @@ use Agent
 
   # Start the Agent with the initial state
   def start_link(little_games) do
-    Agent.start_link(fn -> %{little_games: little_games} end, name: __MODULE__)
+    Agent.start_link(fn -> %{little_games: little_games, challenges: []} end, name: __MODULE__)
   end
 
   # Your functions for managing game state
   def get_little_games() do
     Agent.get(__MODULE__, &(&1.little_games))
+  end
+
+  def get_random_game() do
+    IO.puts("Do I come here?")
+    List.first(Enum.shuffle(get_little_games()))
   end
 
   #defp update_state(update_fun) do
@@ -45,16 +50,24 @@ use Agent
         end
     end 
 
+    def initiate_challenge(player_id, opponent_id) do
+      IO.puts("Initiating Challenge between #{player_id} and #{opponent_id}")
+      game = TreasureHunt.GameManager.get_random_game()
+      IO.puts("TTTTT")
+      IO.puts(inspect(game))
+      Supervisor.start_link({game, [player_id, opponent_id]}, [strategy: :one_for_one, name: TreasureHunt.Supervisor])
+    end
+
     defp initiate_challenge(player_id, opponent_id, shuffled_games) do 
          IO.puts("Initiating Challenge between #{player_id} and #{opponent_id}")
 
         # Iterate through the randomized games
-        Enum.each(shuffled_games, fn game ->
-            case game.code do 
-                :guessing_number -> initiate_guessing_number(player_id, opponent_id)
-                _ -> IO.puts("Invalid game choice")
-            end
-        end)
+#        Enum.each(shuffled_games, fn game ->
+#            case game.code do
+#                :guessing_number -> initiate_guessing_number(player_id, opponent_id)
+#                _ -> IO.puts("Invalid game choice")
+#            end
+#        end)
 
         IO.puts("Challenge (Round 1) completed between #{player_id} and #{opponent_id}")
     end
