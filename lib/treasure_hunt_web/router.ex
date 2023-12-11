@@ -24,6 +24,7 @@ defmodule TreasureHuntWeb.Router do
     live "/light", LightLive
 #	  get "/hello", PageController, :index
     live "/game", GameArea
+    live "/rockpaperscissors", RockPaperScissors
 #	  get "/hello/:messenger", PageController, :show
   end
 

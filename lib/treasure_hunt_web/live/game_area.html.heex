@@ -1,9 +1,56 @@
 <h1>Welcome in the game server!</h1>
-
+<%= if ! @joined do %>
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
-
+<% end %>
 <!--<p><%= @player %> has successfully joined the game server.</p>-->
 
+<!--<h3>Your current challenges:</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Game</th>
+      <th>Opponent</th>
+      <th>State</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for element <- @challenges do %>
+      <tr>
+            <td><%= element.game %></td>
+            <td><%= element.player_one %></td>
+            <td><%= element.player_two %></td>
+            <td>
+              <button class="challenge-button" phx-click="enter_challenge" phx-value-game={element.game} phx-value-player_one={element.player_one} phx-value-player_two={element.player_two}>
+                <i class="fa-solid fa-dungeon" ></i>
+              </button>
+            </td>
+          </tr>
+    <% end %>
+  </tbody>
+</table>-->
+
+
+<%= if @game == "TreasureHunt.RockPaperScissorsManager" do %>
+<%= @game_state %>
+<h1>Ready to play Rock Paper Scissors?</h1>
+
+<%= if @game_state == :ok do %>
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="rock" >
+<i class="fa-solid fa-hand-back-fist"></i>
+</button>
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="paper" >
+<i class="fa-solid fa-hand"></i>
+</button>
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="scissor" >
+<i class="fa-solid fa-hand-scissors"></i>
+</button>
+<% end %>
+<%= if @game_state == :wait do %>
+<p>Waiting for opponent to play...</p>
+<% end %>
+
+<% end %>
 
 <h3>Player list:</h3>
 <table>
@@ -21,7 +68,7 @@
             <td><%= key %></td>
             <td><%= value %></td>
             <td>
-              <button class="challenge-button" phx-click="challenge" phx-value-player={@player} phx-value-opponent={key} >
+              <button class="challenge-button" phx-click="new_challenge" phx-value-player={@player} phx-value-opponent={key} >
                 <i class="fa-solid fa-dungeon" ></i>
               </button>
             </td>

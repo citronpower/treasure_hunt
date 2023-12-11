@@ -1,36 +1,21 @@
-defmodule TreasureHunt.RockPaperScissorsManager do
+defmodule TreasureHunt.RockPaperScissorsManager2 do
 
   use Agent
 
-  def start_link(player_one, player_two) do
+  def start_link(player_id,opponent_id,game_manager_id) do
     IO.puts "Rock Paper Scissors game is starting"
-    Agent.start_link(fn -> %{player_one => %{score: 0, current_answer: false}, player_two => %{score: 0, current_answer: false}, round: 0} end, name: __MODULE__)
-#    player1 = player_id
-#    player2 = opponent_id
-#
-#    player1 = spawn(fn -> shifumi1(player1) end)
-#    player2 = spawn(fn -> shifumi2(player2) end)
-#
-#    win1 = 0
-#    win2 = 0
-#
-#    engine = spawn(fn -> engine(player_id,opponent_id,player1,player2,game_manager_id,win1,win2) end)
-#    send(engine,{:init})
-  end
 
-  def update_answer(player, answer) do
-    player_values = Agent.get(__MODULE__, &(Map.get(&1, player)))
-    player_values = Map.put(player_values, :current_answer, answer)
-    Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
-    Agent.update(__MODULE__, &(Map.put(&1, :round, Map.get(&1, :round) + 1)))
+    player1 = player_id
+    player2 = opponent_id
 
-    case rem(Agent.get(__MODULE__, &(Map.get(&1, :round))), 2) do
-      0 ->
-        # update score and return new score
-        :ok
-      _ ->
-        :wait
-    end
+    player1 = spawn(fn -> shifumi1(player1) end)
+    player2 = spawn(fn -> shifumi2(player2) end)
+
+    win1 = 0
+    win2 = 0
+
+    engine = spawn(fn -> engine(player_id,opponent_id,player1,player2,game_manager_id,win1,win2) end)
+    send(engine,{:init})
   end
 
   def engine(player_id,opponent_id,player1,player2,game_manager_id,win1,win2) do

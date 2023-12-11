@@ -12,8 +12,44 @@ use Agent
   end
 
   def get_random_game() do
-    IO.puts("Do I come here?")
     List.first(Enum.shuffle(get_little_games()))
+  end
+
+#  def start_game(game, player_one, player_two) do
+#    IO.puts("Start game")
+#    Agent.start_link(game, [player_one, player_two])
+#  end
+
+  def get_challenges(player) do
+    challenges = Agent.get(__MODULE__, &(&1.challenges))
+    Enum.filter(challenges, fn %{player_one: p1, player_two: p2} ->
+      p1 == player or p2 == player
+    end)
+  end
+
+  def verify_challenges(game, player1, player2) do
+    challenges = Agent.get(__MODULE__, &(&1.challenges))
+    filtered_challenges = Enum.filter(challenges, fn %{game: g, player_one: p1, player_two: p2} ->
+      ((p1 == player1 and p2 == player2) or (p1 == player2 and p2 == player1)) and g == game
+    end)
+    length(filtered_challenges) > 0
+  end
+
+  def add_challenge(game, player1, player2) do
+    IO.puts("add_challenge")
+
+    if ! verify_challenges(game, player1, player2) do
+      challenge = %{}
+
+      player_one = if player1 > player2, do: player2, else: player1 # strange behaviour! (not working!)
+      player_two = if player1 < player2, do: player1, else: player2
+
+      challenge = Map.put(challenge, :player_one, player1) |>
+        Map.put(:player_two, player2)  |>
+        Map.put(:game, game)
+      Agent.update(__MODULE__, &(Map.put(&1, :challenges, [challenge | &1.challenges])))
+    end
+
   end
 
   #defp update_state(update_fun) do
@@ -55,7 +91,9 @@ use Agent
       game = TreasureHunt.GameManager.get_random_game()
       IO.puts("TTTTT")
       IO.puts(inspect(game))
-      Supervisor.start_link({game, [player_id, opponent_id]}, [strategy: :one_for_one, name: TreasureHunt.Supervisor])
+
+      TreasureHunt.GameManager.add_challenge(game, player_id, opponent_id)
+      #Supervisor.start_link({game, [player_id, opponent_id]}, [strategy: :one_for_one, name: TreasureHunt.Supervisor])
     end
 
     defp initiate_challenge(player_id, opponent_id, shuffled_games) do 
