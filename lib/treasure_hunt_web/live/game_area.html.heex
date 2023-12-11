@@ -1,4 +1,6 @@
 <h1>Welcome in the game server!</h1>
+<p>Your fancy name is: <%= @player %></p>
+
 <%= if ! @joined do %>
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
 <% end %>
@@ -32,22 +34,31 @@
 
 
 <%= if @game == "TreasureHunt.RockPaperScissorsManager" do %>
-<%= @game_state %>
+
 <h1>Ready to play Rock Paper Scissors?</h1>
 
 <%= if @game_state == :ok do %>
-<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="rock" >
+
+<%= if @winner != nil do %>
+<p><%= @winner %> won the round!</p>
+<% end %>
+
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name} phx-value-answer="rock" >
 <i class="fa-solid fa-hand-back-fist"></i>
 </button>
-<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="paper" >
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name} phx-value-answer="paper" >
 <i class="fa-solid fa-hand"></i>
 </button>
-<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-answer="scissor" >
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name} phx-value-answer="scissor" >
 <i class="fa-solid fa-hand-scissors"></i>
 </button>
 <% end %>
 <%= if @game_state == :wait do %>
 <p>Waiting for opponent to play...</p>
+<% end %>
+
+<%= if @game_state == :win do %>
+<p>Congratulation to <%= @winner %>, you won!</p>
 <% end %>
 
 <% end %>

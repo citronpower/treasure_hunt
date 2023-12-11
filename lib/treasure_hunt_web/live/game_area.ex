@@ -73,31 +73,48 @@ defmodule TreasureHuntWeb.GameArea do
     game.start_link(player, opponent) # problem that we can't have multiple instances of the same game at the same time
 
     #TreasureHunt.GameManager.add_challenge(game, player, opponent)
-
-    TreasureHuntWeb.Endpoint.broadcast_from(self(), "game_" <> opponent, "enter_challenge", %{game: game, player_one: player, player_two: opponent})
+    channel_name = "game_" <> opponent
+    TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "enter_challenge", %{game: game, player_one: player, player_two: opponent, channel_name: channel_name})
 
     #{:noreply, assign(socket, %{challanges: TreasureHunt.GameManager.get_challenges(player)})}
     state = %{
+      channel_name: channel_name,
       game: inspect(game),
-      game_state: :ok
+      game_state: :ok,
+      winner: nil
     }
     {:noreply, assign(socket, state)}
   end
 
-  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.RockPaperScissorsManager", "player" => player, "value" => _}, socket) do
+  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.RockPaperScissorsManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
     IO.puts("GAME_ANSWER")
     IO.puts(inspect(answer))
     IO.puts(inspect(player))
-    res = TreasureHunt.RockPaperScissorsManager.update_answer(player, answer)
-    case res do
-      :wait ->
-        {:noreply, assign(socket, :game_state, res)}
-      :ok ->
-        {:noreply, assign(socket, :game_state, res)}
-      _ ->
-        IO.puts("MMMMH????")
-        {:noreply, socket}
-    end
+    IO.puts(inspect(channel_name))
+    {res, winner} = TreasureHunt.RockPaperScissorsManager.update_answer(player, answer)
+
+    TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", %{game_state: res, winner: winner})
+
+    state = %{
+      game_state: res,
+      winner: winner
+    }
+    IO.puts("state:")
+    IO.puts(inspect(state))
+    {:noreply, assign(socket, state)}
+#    case res do
+#      :wait ->
+#        {:noreply, assign(socket, :game_state, :wait)}
+#      :tie ->
+#        {:noreply, assign(socket, :game_state, :ok)}
+#      :ok ->
+#        {:noreply, assign(socket, :game_state, :ok)}
+#      :win ->
+#        {:noreply, assign(socket, :game_state, :win)}
+#      _ ->
+#        IO.puts("MMMMH????")
+#        {:noreply, socket}
+#    end
   end
 
 
@@ -114,9 +131,25 @@ defmodule TreasureHuntWeb.GameArea do
 #      |> assign(:players, TreasureHunt.PlayerManager.get_players())
     state = %{
       game: inspect(Map.get(payload, :game)),
-      game_state: :ok
+      game_state: :ok,
+      winner: nil,
+      channel_name: Map.get(payload, :channel_name)
     }
     {:noreply, assign(socket, state)}
+  end
+
+  def handle_info(%{topic: "game_" <> opponent, event: "game_answer", payload: payload}, socket) do
+    IO.puts("HANDLE ANSWER: #{inspect(payload)}")
+#    socket =
+#      socket
+#      |> assign(:players, TreasureHunt.PlayerManager.get_players())
+    #state = %{
+#      game: inspect(Map.get(payload, :game)),
+#      game_state: :ok,
+#      winner: nil,
+#      channel_name: Map.get(payload, :channel_name)
+    #}
+    {:noreply, assign(socket, payload)}
   end
 
   def handle_info(msg, socket) do
