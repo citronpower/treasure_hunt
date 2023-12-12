@@ -27,18 +27,19 @@ defmodule TreasureHunt.RockPaperScissorsManager do
 #    send(engine,{:init})
   end
 
-  def verify_score(score) do
-
+  def reset_values(player_one, player_two) do
+    Agent.update(__MODULE__, &(Map.put(&1, player_one, %{
+                               score: 0,
+                               current_answer: false
+                             })))
+    Agent.update(__MODULE__, &(Map.put(&1, player_two, %{
+                               score: 0,
+                               current_answer: false
+                             })))
   end
 
   def update_results() do
     [player_one | [player_two | _]] = Agent.get(__MODULE__, &(Map.get(&1, :players)))
-
-    IO.puts("player_one")
-    IO.puts(inspect(player_one))
-    IO.puts(inspect(Agent.get(__MODULE__, &(Map.get(&1, player_one)))))
-    IO.puts("player_two")
-    IO.puts(inspect(player_two))
 
     player_one_values = Agent.get(__MODULE__, &(Map.get(&1, player_one)))
     player_two_values = Agent.get(__MODULE__, &(Map.get(&1, player_two)))
@@ -55,34 +56,30 @@ defmodule TreasureHunt.RockPaperScissorsManager do
     player_two_score = player_two_values |>
       Map.get(:score)
 
-    IO.puts(inspect(player_one_current_answer))
-    IO.puts(inspect(player_two_current_answer))
     result = TreasureHunt.RockPaperScissorsManager.compare_choices(player_one_current_answer, player_two_current_answer)
-    IO.puts("And the winner is???")
-    IO.puts(inspect(result))
+
+    player_one_values = Map.put(player_one_values, :current_answer, false)
+    player_two_values = Map.put(player_two_values, :current_answer, false)
+
     case result do
       :player_one ->
-        IO.puts("Player oneeeeeeeeeeeeee")
         player_one_score = player_one_score + 1
-        IO.puts(player_one_score)
 
         case player_one_score >= 3 do
           true ->
+            TreasureHunt.RockPaperScissorsManager.reset_values(player_one, player_two)
             {:win, player_one}
           false ->
-            IO.puts(player_one_score)
             player_one_values = Map.put(player_one_values, :score, player_one_score)
-            IO.puts(inspect(player_one_values))
             Agent.update(__MODULE__, &(Map.put(&1, player_one, player_one_values)))
             {:ok, player_one}
         end
       :player_two ->
-        IO.puts("Player twoooooooooooo")
         player_two_score = player_two_score + 1
-        IO.puts(player_two_score)
 
         case player_two_score >= 3 do
           true ->
+            TreasureHunt.RockPaperScissorsManager.reset_values(player_one, player_two)
             {:win, player_two}
           false ->
             player_two_values = Map.put(player_two_values, :score, player_two_score)
@@ -114,10 +111,11 @@ defmodule TreasureHunt.RockPaperScissorsManager do
 
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
     Agent.update(__MODULE__, &(Map.put(&1, :round, Map.get(&1, :round) + 1)))
-
+    IO.puts("update_answer")
+    IO.puts(inspect(Agent.get(__MODULE__, &(&1))))
     case rem(Agent.get(__MODULE__, &(Map.get(&1, :round))), 2) do
       0 ->
-        Agent.update(__MODULE__, &(Map.put(&1, :round, Map.get(&1, :round) + 1)))
+        #Agent.update(__MODULE__, &(Map.put(&1, :round, Map.get(&1, :round) + 1)))
         updated_results = TreasureHunt.RockPaperScissorsManager.update_results()
         IO.puts(inspect(updated_results))
         updated_results
