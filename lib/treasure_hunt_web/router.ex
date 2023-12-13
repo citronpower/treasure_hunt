@@ -17,15 +17,11 @@ defmodule TreasureHuntWeb.Router do
   scope "/", TreasureHuntWeb do
     pipe_through :browser
 
-    #get "/", PageController, :home
-	  get "/", PageController, :join
-    get "/join", PageController, :join
-    post "/register", PageController, :register
-    live "/light", LightLive
-#	  get "/hello", PageController, :index
-    live "/game", GameArea
-    live "/rockpaperscissors", RockPaperScissors
-#	  get "/hello/:messenger", PageController, :show
+    # get "/", PageController, :home # DEPRECATED
+	  # get "/", PageController, :join # DEPRECATED
+    # get "/join", PageController, :join # DEPRECATED
+    # post "/register", PageController, :register # DEPRECATED
+    live "/", GameArea
   end
 
   # Other scopes may use custom stacks.

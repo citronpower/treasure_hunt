@@ -4,34 +4,6 @@
 <%= if ! @joined do %>
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
 <% end %>
-<!--<p><%= @player %> has successfully joined the game server.</p>-->
-
-<!--<h3>Your current challenges:</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Game</th>
-      <th>Opponent</th>
-      <th>State</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <%= for element <- @challenges do %>
-      <tr>
-            <td><%= element.game %></td>
-            <td><%= element.player_one %></td>
-            <td><%= element.player_two %></td>
-            <td>
-              <button class="challenge-button" phx-click="enter_challenge" phx-value-game={element.game} phx-value-player_one={element.player_one} phx-value-player_two={element.player_two}>
-                <i class="fa-solid fa-dungeon" ></i>
-              </button>
-            </td>
-          </tr>
-    <% end %>
-  </tbody>
-</table>-->
-
 
 <%= if @game == "TreasureHunt.RockPaperScissorsManager" do %>
 

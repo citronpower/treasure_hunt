@@ -7,6 +7,7 @@ defmodule TreasureHunt.PlayerManager do
 
   def add_player(player_name) do
     random_number = :rand.uniform(9000) + 1000
+    # TODO: change the fancy name of the player by a random username
     Agent.update(__MODULE__, &(Map.put(&1, player_name, random_number)))
     get_players()
   end
