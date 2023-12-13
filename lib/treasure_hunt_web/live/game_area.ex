@@ -3,23 +3,14 @@ defmodule TreasureHuntWeb.GameArea do
 
   @topic "gamearea"
 
+  # initiate
   def mount(_params, session, socket) do
     TreasureHuntWeb.Endpoint.subscribe(@topic) # general channel for all players
 
     player = Map.get(session, "_csrf_token") # fancy name of the player
-    players = %{}
-
-    if player != nil do
-      players = TreasureHunt.PlayerManager.get_players() |>
-                                             Map.delete(player)
-    end
-
-    #challenges = TreasureHunt.GameManager.get_challenges(player) # DEPRECATED
 
     state = %{
-      players: players,
       player: player,
-      #challenges: challenges,
       joined: false,
       game: false
     }
@@ -34,6 +25,7 @@ defmodule TreasureHuntWeb.GameArea do
 #    """
 #  end
 
+  # handle the click on the button "JOIN THE GAME !"
   def handle_event("join", value, socket) do
     IO.puts("HANDLE EVENT join")
     player = Map.get(value, "player")
@@ -53,6 +45,7 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle the click on the button to challenge another player
   def handle_event("new_challenge", value, socket) do
     IO.puts("HANDLE EVENT new_challenge")
     player = Map.get(value, "player")
@@ -81,6 +74,7 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle the click on one of the button of the rock/paper/scissor game
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.RockPaperScissorsManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
     IO.puts("HANDLE EVENT game_answer")
     {res, winner} = TreasureHunt.RockPaperScissorsManager.update_answer(player, answer)
@@ -93,6 +87,11 @@ defmodule TreasureHuntWeb.GameArea do
       TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
     end
 
+    if res == :win do
+      TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
+      TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
+    end
+
     state = %{
       game_state: res,
       winner: winner
@@ -100,12 +99,14 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle broadcast on the general channel of the game area
   def handle_info(%{topic: "gamearea", event: "join", payload: payload}, socket) do
     IO.puts("HANDLE INFO join: #{inspect(payload)}")
 
     {:noreply, assign(socket, :players, TreasureHunt.PlayerManager.get_players())}
   end
 
+  # handle broadcast of a given challenge (i.e. game_xy) at the creation of the challenge
   def handle_info(%{topic: "game_" <> opponent, event: "enter_challenge", payload: payload}, socket) do
     IO.puts("HANDLE INFO enter_challenge: #{inspect(payload)}")
 
@@ -118,6 +119,7 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle broadcast of a given challenge (i.e. game_xy) when a new answer is given by one of the player
   def handle_info(%{topic: "game_" <> opponent, event: "game_answer", payload: payload}, socket) do
     IO.puts("HANDLE INFO game_answer: #{inspect(payload)}")
 

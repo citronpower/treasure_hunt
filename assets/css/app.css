@@ -36,3 +36,99 @@ table {
     border-radius: 3px;
     cursor: pointer;
   }
+
+  .live-view-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f7f7f7;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for form inputs */
+.live-view-container input[type="text"],
+.live-view-container input[type="email"],
+.live-view-container input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Style for buttons */
+
+
+.live-view-container h1 {
+  font-size: 2.5em;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.live-view-container p {
+  font-size: 1.2em;
+  color: #666;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.live-view-container button.challenge-button {
+  display: block;
+  margin: 20px auto; /* Center the button and add distance from the previous paragraph */
+  font-size: 1.5em; /* Make the font size bigger */
+  padding: 15px 20px; /* Increase padding for a larger button */
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.live-view-container button.challenge-button:hover {
+  background-color: #45a049;
+}
+
+.live-view-container .game-buttons-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* Adjust the top margin as needed */
+}
+
+.live-view-container .game-buttons-container .game-button {
+  flex: 1;
+  margin: 0 10px; /* Adjust the horizontal margin as needed */
+  font-size: 1.2em;
+  padding: 50px 50px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.live-view-container .game-buttons-container .game-button i {
+  margin-right: 8px; /* Adjust the icon's right margin as needed */
+}
+
+/* Style for alerts or notifications */
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #d4e3ff;
+  border-radius: 4px;
+  background-color: #e7f0ff;
+  color: #1a56f0;
+}
+
+/* Style for error messages */
+.error {
+  color: #d9534f;
+}
