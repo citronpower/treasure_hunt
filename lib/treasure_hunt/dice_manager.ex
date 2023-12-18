@@ -34,6 +34,8 @@ defmodule TreasureHunt.DiceManager do
 
     result = TreasureHunt.DiceManager.compare_results(player_one_current_answer,player_two_current_answer)
     IO.puts "result of #{player_one} #{player_one_current_answer} and #{player_two} #{player_two_current_answer}"
+    value1 = player_one_current_answer
+    value2 = player_two_current_answer
     case result do
       "player_one" ->
         TreasureHunt.DiceManager.reset_values(player_one,player_two)
@@ -42,7 +44,7 @@ defmodule TreasureHunt.DiceManager do
         TreasureHunt.DiceManager.reset_values(player_one,player_two)
         {:win,player_two}
       "tie" ->
-        {:ok,"nobody"}
+        {:tie,"nobody"}
     end
     # player_one_values = Map.put(player_one_values, :current_answer, false)
     # player_two_values = Map.put(player_two_values, :current_answer, false)

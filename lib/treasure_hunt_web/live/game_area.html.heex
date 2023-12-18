@@ -56,12 +56,22 @@
 </button>
 </div>
 <% end %>
+
+<%= if @game_state == :tie do %>
+<p>It's a tie ! Roll again !</p>
+<div class="game-buttons-container">
+<button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name} phx-value-answer= "go"> 
+<i class="fa-solid fa-dice"></i>
+</button>
+</div>
+<% end %>
+
 <%= if @game_state == :wait do %>
 <p>Waiting for opponent to play...</p>
 <% end %>
 
 <%= if @game_state == :win and @winner == @player do %>
-<p>Congratulation, you won!</p>
+<p>Congratulation, you won! </p>
 <% end %>
 
 <%= if @game_state == :win and @winner != @player do %>
