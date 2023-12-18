@@ -6,6 +6,7 @@ defmodule TreasureHunt.GuessTheNumberManager do
     IO.puts "Guess the number is starting, the number you have to find is between 1 and 50"
     #generate random number between 0 ans 50
     random_number = :rand.uniform(50)
+
     Agent.start_link(fn -> %{:players =>[player_one, player_two],
                             player_one => %{
                               random_number: random_number,
@@ -37,7 +38,7 @@ defmodule TreasureHunt.GuessTheNumberManager do
     current_player =
     cond do
       player == player_one -> "player_one"
-      player == player_two -> "opponent_two"
+      player == player_two -> "player_two"
     end
 
     IO.puts "current one is #{current_player}"
@@ -52,12 +53,6 @@ defmodule TreasureHunt.GuessTheNumberManager do
         Agent.get(__MODULE__, &(Map.get(&1,player_two)))
     end
 
-    # player_one_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
-    # player_two_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
-    # player_one_current_answer = player_id_values |> Map.get(:current_answer)
-    # player_two_current_answer = opponent_id_values |> Map.get(:current_answer)
-
-
     player_current_answer = player_values |> Map.get(:current_answer)
     random_number = player_values |> Map.get(:random_number)
 
@@ -67,25 +62,21 @@ defmodule TreasureHunt.GuessTheNumberManager do
     case result do
       "equal" ->
         TreasureHunt.GuessTheNumberManager.reset_values(player_one,player_two)
-        {:win,player,player_current_answer,false}
+        {:win,player,player_current_answer}
       "lower" ->
         case player do
           player_one ->
             {:lower,player_two,player_current_answer}
-            #{:wait,player,player_current_answer,"lower"}
           player_two ->
             {:lower,player_one,player_current_answer}
-            #{:wait,player,player_current_answer,"lower"}
         end
 
       "bigger" ->
         case player do
           player_one ->
             {:bigger,player_two,player_current_answer}
-            #{:wait,player,player_current_answer,"bigger"}
           player_two ->
             {:bigger,player_one,player_current_answer}
-            #{:wait,player,player_current_answer,"bigger"}
         end
     end
   end
@@ -97,117 +88,19 @@ defmodule TreasureHunt.GuessTheNumberManager do
 
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
 
-    updated_results =
-    case answer |> Integer.parse() do
-      {guessed_number, rest} ->
-        case rest do
-          "" ->
-            case guessed_number >= 1 and guessed_number <= 50 do
-              true ->
-                IO.puts "Valid input: #{guessed_number}"
-                player_values = Map.put(player_values, :current_answer, guessed_number)
-                Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
-                IO.puts inspect(player_values)
-                TreasureHunt.GuessTheNumberManager.update_results(player)
-              _ ->
-                IO.puts "Invalid input"
-                case player do
-                  player_one ->
-                    {:error, player,answer,false}
-                  player_two ->
-                    {:error, player,answer,false}
-                end
-            end
-          _ ->
-            IO.puts "Invalid input"
-            case player do
-              player_one ->
-                {:error, player,answer,false}
-              player_two ->
-                {:error, player,answer,false}
-            end
-          end
-      _ ->
-        IO.puts "Invalid input"
-        case player do
-          player_one ->
-            {:error, player,answer,false}
-          player_two ->
-            {:error, player,answer,false}
-        end
-    end
+    {guessed_number, rest}  = answer |> Integer.parse()
+    IO.puts "Valid input: #{guessed_number}"
 
-    # if check_input == :invalid do
-    #   IO.puts "sending not valid"
-    #   case player do
-    #     player_one ->
-    #       {:error, player,answer,false}
-    #     player_two ->
-    #       {:error, player,answer,false}
-    #   end
-    # end
+    player_values = Map.put(player_values, :current_answer, guessed_number)
+    Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+    IO.puts inspect(player_values)
+    updated_results = TreasureHunt.GuessTheNumberManager.update_results(player)
 
     updated_results
 
 
 
-  end
-
-  @doc """
-  Engine of the game
-  """
-  def engine(player_id, opponent_id, player1, player2, random_number, game_manager_id) do
-    receive do
-      {:init} ->
-        #IO.puts "#{inspect(player1)} #{inspect(player2)} #{random_number}"
-        Process.sleep(100) #I don't know why it doesn't work without that
-        #start the game
-        send(player1,{:play, self()})
-
-      {:guess, guessed_number, source} ->
-        result = compare_number(random_number,guessed_number)
-
-        if result != "equal" do
-          IO.puts "The number is #{result}"
-        end
-
-        next =
-          cond do
-            source == player1 -> player2
-            source == player2 -> player1
-          end
-
-        cond do
-          result != "equal" -> send(next, {:play, self()})
-          result == "equal" -> send(self(), {:end_game,source})
-        end
-
-        {:end_game, winner} ->
-          cond do
-            winner == player1 -> send(game_manager_id,{:endgame,player_id})
-            winner == player2 -> send(game_manager_id,{:endgame,opponent_id})
-            true -> send(game_manager_id,{:endgame,"no"})
-          end
-          #IO.puts "The winner is #{name} !"
-          #Process.sleep(2000) #to ensure the victory message is printed
-          #send(game_manager_id,{:endgame,name}) #end-game
-          Process.exit(player1, :normal)
-          Process.exit(player2, :normal)
-          Process.exit(self(), :normal)
-
-    end
-
-    engine(player_id,opponent_id, player1, player2, random_number,game_manager_id)
-  end
-
-  def guess(player_id) do
-    receive do
-      {:play, source} ->
-        #IO.puts "#{player_id}: received start"
-        guessed_number = check_error(player_id)
-        send(source,{:guess,guessed_number,self()})
-    end
-    guess(player_id)
   end
 
   def compare_number(random_number,guessed_number) do
@@ -218,27 +111,6 @@ defmodule TreasureHunt.GuessTheNumberManager do
     end
   end
 
-  defp check_error(player_id) do
-    input = IO.gets("#{player_id}, please guess a number: ")
-        case input |> Integer.parse() do
-          {guessed_number,rest} ->
-            case rest do
-              "\n" ->
-                case guessed_number >= 1 and guessed_number <= 50 do
-                  true ->
-                    guessed_number
-                  _ ->
-                    IO.puts "Invalid input. Please enter a number between 1 and 50"
-                    check_error(player_id)
-                end
-              _ ->
-                IO.puts("Invalid input. Please enter a valid number.")
-                check_error(player_id)
-            end
-          _ ->
-            IO.puts("Invalid input. Please enter a valid number.")
-            check_error(player_id)
-        end
-  end
+
 
 end

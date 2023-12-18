@@ -107,33 +107,13 @@ defmodule TreasureHuntWeb.GameArea do
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.GuessTheNumberManager", "player" => player, "channel_name" => channel_name}, socket) do
     IO.puts("HANDLE EVENT game_answer")
 
-    {res, winner, guessed_number,status} = TreasureHunt.GuessTheNumberManager.update_answer(player, answer)
-    IO.puts {res, winner, guessed_number,status}
+    {res, winner, guessed_number} = TreasureHunt.GuessTheNumberManager.update_answer(player, answer)
 
-    if res != :wait do
+    if res != :win do
       broadcast_values = %{
         game_state: res,
         winner: winner,
         number: guessed_number
-      }
-      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
-    end
-
-    if res == :wait do
-      broadcast_values = %{
-        game_state: res,
-        winner: winner,
-        number: guessed_number,
-        status: status
-      }
-      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
-    end
-
-    #to manage a false user input
-    if res == :error do
-      broadcast_values = %{
-        game_state: res,
-        winner: winner
       }
       TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
     end
@@ -147,7 +127,6 @@ defmodule TreasureHuntWeb.GameArea do
       game_state: res,
       winner: winner,
       number: guessed_number
-      # user_input: answer
     }
     {:noreply, assign(socket, state)}
   end
