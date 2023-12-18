@@ -65,12 +65,12 @@
     </form>
   </div>
   <% end %>
-  
-  <%= if @game_state == :ok and @player == @player_two do %>
+
+  <%= if @game_state == :ok and @player != @player_one do %>
     <p>Waiting for opponent to play...</p>
   <% end %>
 
-  <%= if @game_state == :lower and @winner == @player do %>
+  <%= if @game_state == :lower and @player == @winner do %>
 
     <p>Your opponent guessed <%= @number %>, the random number is lower than this !</p>
     <div class="game-input-container">
@@ -90,12 +90,12 @@
 
   <% end %>
 
-  <%= if @game_state == :lower and @winner != @player do %>
+  <%= if @game_state == :lower and @player != @winner do %>
     <p>You tried <%= @number %> and the random number is lower than that! </p>
     <p>Waiting for opponent to play...</p>
   <% end %>
 
-  <%= if @game_state == :bigger and @winner == @player do %>
+  <%= if @game_state == :bigger and @player == @winner do %>
 
     <p>Your opponent guessed <%= @number %>, the random number is bigger than this !</p>
     <div class="game-input-container">
@@ -115,12 +115,10 @@
 
   <% end %>
 
-  <%= if @game_state == :bigger and @winner != @player do %>
+  <%= if @game_state == :bigger and @player != @winner do %>
     <p>You tried <%= @number %> and the random number is bigger than that ! </p>
     <p>Waiting for opponent to play...</p>
   <% end %>
-
-  
 
   <%= if @game_state == :win and @winner == @player do %>
     <p>Congratulations, you won! The random number was <%= @number %></p>

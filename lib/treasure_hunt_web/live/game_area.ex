@@ -57,8 +57,6 @@ defmodule TreasureHuntWeb.GameArea do
     channel_name = "game_" <> opponent
     TreasureHuntWeb.Endpoint.subscribe(channel_name)
 
-    IO.puts "this is main player : #{player}"
-
     broadcast_values = %{
       game: game,
       player_one: player,
@@ -107,18 +105,28 @@ defmodule TreasureHuntWeb.GameArea do
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.GuessTheNumberManager", "player" => player, "channel_name" => channel_name}, socket) do
     IO.puts("HANDLE EVENT game_answer")
 
+    IO.puts "game area player is #{player}"
     {res, winner, guessed_number} = TreasureHunt.GuessTheNumberManager.update_answer(player, answer)
 
     if res != :win do
+
       broadcast_values = %{
         game_state: res,
         winner: winner,
         number: guessed_number
       }
+
       TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
     end
 
     if res == :win do
+      broadcast_values = %{
+        game_state: res,
+        winner: winner,
+        number: guessed_number
+      }
+
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name)
       TreasureHuntWeb.Endpoint.subscribe("game_" <> player)
     end

@@ -4,7 +4,7 @@ defmodule TreasureHunt.GuessTheNumberManager do
 
   def start_link(player_one, player_two) do
     IO.puts "Guess the number is starting, the number you have to find is between 1 and 50"
-    #generate random number between 0 ans 50
+    #generate random number between 1 ans 50
     random_number = :rand.uniform(50)
 
     Agent.start_link(fn -> %{:players =>[player_one, player_two],
@@ -21,12 +21,13 @@ defmodule TreasureHunt.GuessTheNumberManager do
 
 
   def reset_values(player_one, player_two) do
+    random_number = :rand.uniform(50)
     Agent.update(__MODULE__, &(Map.put(&1, player_one, %{
-                               random_number: false,
+                               random_number: random_number,
                                current_answer: false
                              })))
     Agent.update(__MODULE__, &(Map.put(&1, player_two, %{
-                               random_number: false,
+                               random_number: random_number,
                                current_answer: false
                              })))
   end
@@ -41,15 +42,12 @@ defmodule TreasureHunt.GuessTheNumberManager do
       player == player_two -> "player_two"
     end
 
-    IO.puts "current one is #{current_player}"
 
     player_values =
     case current_player do
       "player_one" ->
-        IO.puts "player oneone"
         Agent.get(__MODULE__, &(Map.get(&1,player_one)))
       "player_two" ->
-        IO.puts "player twotwo"
         Agent.get(__MODULE__, &(Map.get(&1,player_two)))
     end
 
@@ -57,39 +55,47 @@ defmodule TreasureHunt.GuessTheNumberManager do
     random_number = player_values |> Map.get(:random_number)
 
     result = TreasureHunt.GuessTheNumberManager.compare_number(random_number,player_current_answer)
-    IO.puts "result of #{random_number} and #{player_current_answer} is #{result}"
+    #IO.puts "result of #{random_number} and #{player_current_answer} is #{result}"
 
     case result do
       "equal" ->
         TreasureHunt.GuessTheNumberManager.reset_values(player_one,player_two)
         {:win,player,player_current_answer}
       "lower" ->
-        case player do
-          player_one ->
+        case current_player do
+          "player_one" ->
+            IO.puts "case player is player one lower"
             {:lower,player_two,player_current_answer}
-          player_two ->
+          "player_two" ->
+            IO.puts "case player is player two lower"
             {:lower,player_one,player_current_answer}
         end
 
       "bigger" ->
-        case player do
-          player_one ->
+        IO.puts "player one is #{player_one}"
+        IO.puts "player two is #{player_two}"
+        case current_player do
+          "player_one" ->
+            IO.puts "case player is player one bigger"
             {:bigger,player_two,player_current_answer}
-          player_two ->
+          "player_two" ->
+            IO.puts "case player is player two bigger"
             {:bigger,player_one,player_current_answer}
+          _ ->
+            "no match man :("
         end
     end
   end
 
   def update_answer(player, answer) do
     [player_one | [player_two| _]] = Agent.get(__MODULE__,&Map.get(&1, :players))
-    IO.puts "updating answer"
+
     player_values = Agent.get(__MODULE__, &(Map.get(&1, player)))
 
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
 
     {guessed_number, rest}  = answer |> Integer.parse()
-    IO.puts "Valid input: #{guessed_number}"
+
 
     player_values = Map.put(player_values, :current_answer, guessed_number)
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
@@ -98,8 +104,6 @@ defmodule TreasureHunt.GuessTheNumberManager do
     updated_results = TreasureHunt.GuessTheNumberManager.update_results(player)
 
     updated_results
-
-
 
   end
 
@@ -110,7 +114,5 @@ defmodule TreasureHunt.GuessTheNumberManager do
       guessed_number < random_number -> "bigger"
     end
   end
-
-
 
 end
