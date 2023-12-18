@@ -6,6 +6,7 @@
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
 <% end %>
 
+<!-- Start of code for RockPaperScissors -->
 <%= if @game == "TreasureHunt.RockPaperScissorsManager" do %>
 
 <h1>Ready to play Rock Paper Scissors?</h1>
@@ -40,6 +41,107 @@
 <% end %>
 
 <% end %>
+<!-- End of code for RockPaperScissors -->
+
+<!-- Start of code for GuessTheNumber -->
+
+<%= if @game == "TreasureHunt.GuessTheNumberManager" do %>
+
+  <h1>Ready to play Guess The Number?</h1>
+
+  <%= if @game_state == :ok and @player == @player_one do %>
+      <div class="game-input-container">
+        <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+        <label>Try to guess the number ! (between 1 and 50):
+          <input 
+            id="msg"
+            type="text"
+            name="answer"/></label>
+        <button class="small-game-button">Submit</button>
+        </form>
+      </div>
+  <% end %>
+  <%= if @game_state == :ok and @player == @player_two do %>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :lower do %>
+
+    <%= if @winner != nil do %>
+    <p><%= @winner %> won the round! The random number was <%= @number %></p>
+    <% end %>
+
+    <p>Your opponent guessed <%= @number %>, the random number is lower than this !</p>
+    <div class="game-input-container">
+      <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+      <label>Try to guess the number ! (between 1 and 50):
+        <input 
+          id="msg"
+          type="text"
+          name="answer"/></label>
+      <button class="small-game-button">Submit</button>
+      </form>
+    </div>
+
+  <% end %>
+
+  <%= if @game_state == :lower and @winner != @player do %>
+    <p>You tried <%= @number %> and the random number is <%= @status %> ! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :bigger and @winner == @player do %>
+
+    <%= if @winner != nil do %>
+      <p><%= @winner %> won the round! The random number was <%= @number %></p>
+    <% end %>
+
+    <p>Your opponent guessed <%= @number %>, the random number is bigger than this !</p>
+    <div class="game-input-container">
+      <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+      <label>Try to guess the number ! (between 1 and 50):
+        <input 
+          id="msg"
+          type="text"
+          name="answer"/></label>
+      <button class="small-game-button">Submit</button>
+      </form>
+    </div>
+
+  <% end %>
+
+  <%= if @game_state == :bigger and @winner != @player do %>
+    <p>You tried <%= @number %> and the random number is <%= @status %> ! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :error do %>
+  <div class="game-input-container">
+    <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+    <label>Invalid input, please enter a number between 1 and 50:
+      <input 
+        id="msg"
+        type="text"
+        name="answer"/></label>
+    <button class="small-game-button">Submit</button>
+    </form>
+  </div>
+  <% end %>
+  <%= if @game_state == :error and @player == @player_two do %>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :win and @winner == @player do %>
+    <p>Congratulations, you won!</p>
+  <% end %>
+
+  <%= if @game_state == :win and @winner != @player do %>
+    <p>Sorry, you lost!</p>
+  <% end %>
+
+<% end %>
+
+<!-- End of code for GuessTheNumber -->
 
 <%= if @joined do %>
 <table>

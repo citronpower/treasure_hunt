@@ -20,7 +20,7 @@ defmodule TreasureHunt.Application do
       # Start to serve requests, typically the last entry
       TreasureHuntWeb.Endpoint,
       {TreasureHunt.PlayerManager, []},
-      {TreasureHunt.GameManager, [TreasureHunt.RockPaperScissorsManager]}#, TreasureHunt.DiceManager, TreasureHunt.HangmanManager, TreasureHunt.RockPaperScissorsManager]}
+      {TreasureHunt.GameManager, [TreasureHunt.RockPaperScissorsManager, TreasureHunt.GuessTheNumberManager]}#, TreasureHunt.DiceManager, TreasureHunt.HangmanManager, TreasureHunt.RockPaperScissorsManager]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

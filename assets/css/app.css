@@ -37,6 +37,25 @@ table {
     cursor: pointer;
   }
 
+  button.game-button:hover{
+    background-color: #45a049 !important;
+  }
+
+  .small-game-button {
+    padding:10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    background-color: #4daf50;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  button.small-game-button:hover {
+    background-color: #45a049;
+  }
+
   .live-view-container {
   max-width: 800px;
   margin: 0 auto;

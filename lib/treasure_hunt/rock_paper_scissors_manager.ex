@@ -76,7 +76,7 @@ defmodule TreasureHunt.RockPaperScissorsManager do
     end
   end
 
-  def update_answer(player, answer) do
+ def update_answer(player, answer) do
 
     player_values = Agent.get(__MODULE__, &(Map.get(&1, player)))
     player_values = Map.put(player_values, :current_answer, answer)
@@ -88,7 +88,7 @@ defmodule TreasureHunt.RockPaperScissorsManager do
       0 ->
         updated_results = TreasureHunt.RockPaperScissorsManager.update_results()
         updated_results
-      _ ->
+      _  ->
         {:wait, nil}
     end
   end

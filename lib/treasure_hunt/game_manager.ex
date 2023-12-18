@@ -56,7 +56,7 @@ use Agent
   #  Agent.update(__MODULE__, update_fun)
   #end
 
-# Little Games 
+# Little Games
 #    def get_little_Games() do
 #    [
 #      %{name: "Hangman", code: :hangman},
@@ -84,7 +84,7 @@ use Agent
           {:error, reason} ->
             IO.puts("Error: #{reason}")
         end
-    end 
+    end
 
     def initiate_challenge(player_id, opponent_id) do
       IO.puts("Initiating Challenge between #{player_id} and #{opponent_id}")
@@ -96,7 +96,7 @@ use Agent
       #Supervisor.start_link({game, [player_id, opponent_id]}, [strategy: :one_for_one, name: TreasureHunt.Supervisor])
     end
 
-    defp initiate_challenge(player_id, opponent_id, shuffled_games) do 
+    defp initiate_challenge(player_id, opponent_id, shuffled_games) do
          IO.puts("Initiating Challenge between #{player_id} and #{opponent_id}")
 
         # Iterate through the randomized games
@@ -110,11 +110,11 @@ use Agent
         IO.puts("Challenge (Round 1) completed between #{player_id} and #{opponent_id}")
     end
 
-#    def handle_challenge_result(challenger_id, opponent_id, result) do 
-#        # Implement logic 
-#    end 
+#    def handle_challenge_result(challenger_id, opponent_id, result) do
+#        # Implement logic
+#    end
 
-#Update Player State after little games 
+#Update Player State after little games
 
     def update_player_score(player_id, result) do
         case result do
@@ -133,15 +133,15 @@ use Agent
     end
 
 
-# Private Helper Functions 
+# Private Helper Functions
 
-    # Function to get opponent for a player 
+    # Function to get opponent for a player
     defp get_opponent(opponent_id) do
         # Check if the chosen opponent is available
         case TreasureHunt.PlayerManager.get_player(opponent_id) do
             {:ok, opponent_state} ->
                 {:ok, opponent_id}
-    
+
             {:error, _} ->
                 {:error, "Chosen opponent is not available"}
         end
@@ -165,7 +165,8 @@ use Agent
 #    end
 
     # Initiate Guessing Number Game
-    defp initiate_guessing_number(player_id, opponent_id) do 
+    defp initiate_guessing_number(player_id, opponent_id) do
         IO.puts("Initiating Guessing Number between #{player_id} and #{opponent_id}")
-    end 
+    end
+
 end
