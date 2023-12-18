@@ -101,6 +101,40 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle the click on the start button of dice game
+  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.DiceManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
+    IO.puts("HANDLE EVENT game_answer")
+    answer =
+    case answer do
+      "go" ->
+        IO.puts "Hello me in changing answer"
+        :rand.uniform(6)
+      _ ->
+        answer
+    end
+    IO.puts "answer is #{answer}"
+    {res, winner} = TreasureHunt.DiceManager.update_answer(player, answer)
+
+    if res != :wait do
+      broadcast_values = %{
+        game_state: res,
+        winner: winner
+      }
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+    end
+
+    if res == :win do
+      TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
+      TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
+    end
+
+    state = %{
+      game_state: res,
+      winner: winner
+    }
+    {:noreply, assign(socket, state)}
+  end
+
   #handle the input in the guess_the_number game
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.GuessTheNumberManager", "player" => player, "channel_name" => channel_name}, socket) do
     IO.puts("HANDLE EVENT game_answer")
