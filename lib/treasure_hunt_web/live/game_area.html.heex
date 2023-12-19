@@ -170,6 +170,123 @@
 
 <!-- End of code for GuessTheNumber -->
 
+<!-- Start of code for Hangman -->
+
+<%= if @game == "TreasureHunt.HangmanManager" do %>
+
+  <h1>Ready to play Hangman?</h1>
+
+  <%= if @game_state == :ok and @player == @player_one do %>
+  <div class="game-input-container">
+    <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+      <label>Try to guess a letter or enter "try" if you think you know the word:
+        <input 
+          id="msg"
+          type="text"
+          name="answer"
+          pattern="[a-zA-Z]|try"
+          title="Please enter a single letter or 'try'"
+          required />
+      </label>
+      <button class="small-game-button">Submit</button>
+    </form>
+  </div>
+  
+  
+  <% end %>
+
+  <%= if @game_state == :ok and @player != @player_one do %>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :nomatch and @player == @winner do %>
+
+    <p>Your opponent guessed nothing, the word looks like this <%= @word %> !</p>
+    <div class="game-input-container">
+      <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+        <label>Try to guess a letter or enter "try" if you think you know the word:
+          <input 
+            id="msg"
+            type="text"
+            name="answer"
+            pattern="[a-zA-Z]|try"
+            title="Please enter a single letter or 'try'"
+            required />
+        </label>
+        <button class="small-game-button">Submit</button>
+      </form>
+    </div>
+
+  <% end %>
+
+  <%= if @game_state == :nomatch and @player != @winner do %>
+    <p>You found nothing... The word looks like this <%= @word %>! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :match and @player == @winner do %>
+
+  <p>Your opponent found a letter! The word now looks like this <%= @word %> !</p>
+  <div class="game-input-container">
+    <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+      <label>Try to guess a letter or enter "try" if you think you know the word:
+        <input 
+          id="msg"
+          type="text"
+          name="answer"
+          pattern="[a-zA-Z]|try"
+          title="Please enter a single letter or 'try'"
+          required />
+      </label>
+      <button class="small-game-button">Submit</button>
+    </form>
+  </div>
+
+  <% end %>
+
+  <%= if @game_state == :match and @player != @winner do %>
+    <p>You found a letter ! The word now looks like this <%= @word %>! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :guess and @player == @winner do %>
+
+  <p>Ok, do you have what it takes to guess the word ? It currently looks like this: <%= @word %> !</p>
+  <div class="game-input-container">
+    <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+      <label>Try to guess a single word:
+        <input 
+          id="msg"
+          type="text"
+          name="answer"
+          pattern="[a-zA-Z]+"
+          title="Please enter a valid word without numbers or special characters"
+          required />
+      </label>
+      <button class="small-game-button">Submit</button>
+    </form>
+  </div>
+  
+
+  <% end %>
+
+  <%= if @game_state == :guess and @player != @winner do %>
+    <p>You're opponent is trying to guess a word ! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
+  <%= if @game_state == :win and @winner == @player do %>
+    <p>Congratulations, you won! The random word was <%= @word %></p>
+  <% end %>
+
+  <%= if @game_state == :win and @winner != @player do %>
+    <p>Sorry, you lost! The random word was <%= @word %></p>
+  <% end %>
+
+<% end %>
+
+<!-- End of code for Hangman -->
+
 <%= if @joined do %>
 <table>
   <thead>

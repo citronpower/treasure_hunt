@@ -2,68 +2,158 @@ defmodule TreasureHunt.HangmanManager do
 
   use Agent
 
-  def start_link(player_id,opponent_id,game_manager_id) do
+  def start_link(player_one,player_two) do
     IO.puts "Hangman game is starting"
 
-    player1 = player_id
-    player2 = opponent_id
-
-    player1 = spawn(fn -> letter(player1) end)
-    player2 = spawn(fn -> letter(player2) end)
-
-    random_word = choose_random_word("wordlist.txt")
+    #generate random_word and the hidden word
+    random_word = choose_random_word(Path.join([__DIR__, "wordlist.txt"]))
     length = length = String.length(random_word)
     word = String.duplicate("_", length)
-    #IO.puts "random word is #{random_word}"
+    IO.puts "random word is #{random_word}"
 
-    engine = spawn(fn -> engine(player_id,opponent_id,player1,player2,game_manager_id,random_word,word) end)
-    send(engine,{:init})
+    Agent.start_link(fn -> %{:players =>[player_one, player_two],
+                            player_one => %{
+                              random_word: random_word,
+                              word: word,
+                              current_answer: false
+                            },
+                            player_two => %{
+                              random_word: random_word,
+                              word: word,
+                              current_answer: false
+                            }} end, name: __MODULE__)
   end
 
-  def engine(player_id,opponent_id,player1,player2,game_manager_id,random_word,word) do
-    receive do
-      {:init} ->
-        IO.puts "Hello #{player_id} and #{opponent_id} the word you need to guess looks like this : #{word}"
-        send(player1,{:play,self(),word})
+  def reset_values(player_one, player_two) do
+    #generate random_word and the hidden word
+    random_word = choose_random_word(Path.join([__DIR__, "wordlist.txt"]))
+    length = length = String.length(random_word)
+    word = String.duplicate("_", length)
 
-        {:guess,guessed_letter,source,current_word} ->
-          new_word =
-          cond do
-            check_letter(guessed_letter,random_word,current_word) == "no_match" -> current_word
-            true -> check_letter(guessed_letter,random_word,current_word)
-          end
-          next =
-          cond do
-            source == player1 -> player2
-            source == player2 -> player1
-          end
-          case new_word == random_word do
-            true ->
-              send(self(),{:end_game,source})
-            _ ->
-              send(next,{:play,self(),new_word})
-          end
+    Agent.update(__MODULE__, &(Map.put(&1, player_one, %{
+                               random_word: random_word,
+                               word: word,
+                               current_answer: false
+                             })))
+    Agent.update(__MODULE__, &(Map.put(&1, player_two, %{
+                               random_word: random_word,
+                               word: word,
+                               current_answer: false
+                             })))
+  end
 
-          {:end_game,winner} ->
-            cond do
-              winner == player1 -> send(game_manager_id,{:endgame,player_id})
-              winner == player2 -> send(game_manager_id,{:endgame,opponent_id})
-              true -> send(game_manager_id,{:endgame,"no"})
+  def update_results(player) do
+    [player_one | [player_two| _]] = Agent.get(__MODULE__,&Map.get(&1, :players))
+
+    current_player =
+    cond do
+      player == player_one -> "player_one"
+      player == player_two -> "player_two"
+    end
+
+    player_values =
+    case current_player do
+      "player_one" ->
+        Agent.get(__MODULE__, &(Map.get(&1,player_one)))
+      "player_two" ->
+        Agent.get(__MODULE__, &(Map.get(&1,player_two)))
+    end
+
+    player_current_answer = player_values |> Map.get(:current_answer)
+    random_word = player_values |> Map.get(:random_word)
+    word = player_values |> Map.get(:word)
+
+    case player_current_answer == "try" do
+      true ->
+        {:guess,player,word}
+      _ ->
+        case player_current_answer == random_word do
+          true ->
+            TreasureHunt.HangmanManager.reset_values(player_one,player_two)
+            {:win,player,random_word}
+          _ ->
+            updated_word = TreasureHunt.HangmanManager.check_letter(player_current_answer,random_word,word)
+
+            player_values = Map.put(player_values, :word, updated_word)
+            Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+            case current_player do
+              "player_one" ->
+                player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
+                player2_values = Map.put(player2_values, :word, updated_word)
+                Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
+              "player_two" ->
+                player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
+                player2_values = Map.put(player2_values, :word, updated_word)
+                Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
             end
-            Process.exit(player1, :normal)
-            Process.exit(player2, :normal)
-            Process.exit(self(), :normal)
+
+            IO.puts "result of #{random_word} and #{player_current_answer} is #{updated_word}"
+
+            case updated_word do
+              "no_match" ->
+                player_values = Map.put(player_values, :word, word)
+                Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+                case current_player do
+                  "player_one" ->
+                    player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
+                    player2_values = Map.put(player2_values, :word, word)
+                    Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
+                  "player_two" ->
+                    player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
+                    player2_values = Map.put(player2_values, :word, word)
+                    Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
+                end
+                case current_player do
+                  "player_one" ->
+                    IO.puts "case player is player one nomatch"
+                    {:nomatch,player_two,word}
+                  "player_two" ->
+                    IO.puts "case player is player two nomatch"
+                    {:nomatch,player_one,word}
+                end
+              _ ->
+                case updated_word == random_word do
+                  true ->
+                    TreasureHunt.HangmanManager.reset_values(player_one,player_two)
+                    {:win,player,updated_word}
+                  _ ->
+                    case current_player do
+                      "player_one" ->
+                        IO.puts "case player is player one HAS match"
+                        {:match,player_two,updated_word}
+                      "player_two" ->
+                        IO.puts "case player is player two HAS match"
+                        {:match,player_one,updated_word}
+                    end
+                end
+            end
+
+
+
+        end
+
     end
-    engine(player_id,opponent_id,player1,player2,game_manager_id,random_word,word)
+
   end
 
-  def letter(player_id) do
-    receive do
-      {:play,source,word} ->
-        guessed_letter = check_error(player_id)
-        send(source,{:guess,guessed_letter,self(),word})
-    end
-    letter(player_id)
+
+  def update_answer(player, answer) do
+    [player_one | [player_two| _]] = Agent.get(__MODULE__,&Map.get(&1, :players))
+
+    player_values = Agent.get(__MODULE__, &(Map.get(&1, player)))
+
+    Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+    player_values = Map.put(player_values, :current_answer, answer)
+    Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+    IO.puts inspect(player_values)
+    updated_results = TreasureHunt.HangmanManager.update_results(player)
+
+    updated_results
+
   end
 
   def choose_random_word(file_path) do
