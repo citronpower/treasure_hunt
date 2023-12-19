@@ -8,7 +8,7 @@ defmodule TreasureHunt.HangmanManager do
     #generate random_word and the hidden word
     random_word = choose_random_word(Path.join([__DIR__, "wordlist.txt"]))
     length = length = String.length(random_word)
-    word = String.duplicate("_", length)
+    word = String.duplicate(".", length)
     IO.puts "random word is #{random_word}"
 
     Agent.start_link(fn -> %{:players =>[player_one, player_two],
@@ -28,7 +28,7 @@ defmodule TreasureHunt.HangmanManager do
     #generate random_word and the hidden word
     random_word = choose_random_word(Path.join([__DIR__, "wordlist.txt"]))
     length = length = String.length(random_word)
-    word = String.duplicate("_", length)
+    word = String.duplicate(".", length)
 
     Agent.update(__MODULE__, &(Map.put(&1, player_one, %{
                                random_word: random_word,
@@ -168,22 +168,6 @@ defmodule TreasureHunt.HangmanManager do
         {:error, reason} ->
           IO.puts("Error reading file: #{reason}")
           "Error: Unable to read the file."
-    end
-  end
-
-  def is_letter(str) do
-    String.length(str) == 1 && String.match?(str, ~r/[a-z]/)
-  end
-
-  def check_error(player_id) do
-    input = IO.gets "#{player_id}, please give me a letter : "
-    letter = is_letter(String.downcase(String.trim(input)))
-    case letter do
-      true ->
-        input
-      _ ->
-        IO.puts "Invalid input, please enter a single letter"
-        check_error(player_id)
     end
   end
 
