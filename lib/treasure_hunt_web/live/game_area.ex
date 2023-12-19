@@ -11,6 +11,8 @@ defmodule TreasureHuntWeb.GameArea do
 
     state = %{
       player: player,
+      random_number: nil,
+      revealed_digits_count: 0,
       joined: false,
       game: false
     }
@@ -33,8 +35,13 @@ defmodule TreasureHuntWeb.GameArea do
     players = TreasureHunt.PlayerManager.add_player(player) |>
                                              Map.delete(player)
 
+    random_number = TreasureHunt.PlayerManager.get_player_random_number(player)
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
+
     state = %{
       player: player,
+      random_number: random_number,
+      revealed_digits_count: revealed_digits_count,
       players: players,
       joined: true
     }
@@ -50,6 +57,7 @@ defmodule TreasureHuntWeb.GameArea do
     IO.puts("HANDLE EVENT new_challenge")
     player = Map.get(value, "player")
     opponent = Map.get(value, "opponent")
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
 
     game = TreasureHunt.GameManager.get_random_game()
     game.start_link(player, opponent) # TODO: solve problem that we can't have multiple instances of the same game at the same time
@@ -69,17 +77,23 @@ defmodule TreasureHuntWeb.GameArea do
       channel_name: channel_name,
       game: inspect(game),
       game_state: :ok,
-      winner: nil
+      winner: nil,
+      revealed_digits_count: revealed_digits_count
     }
     {:noreply, assign(socket, state)}
   end
 
-  # handle the click on one of the button of the rock/paper/scissor game
-  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.RockPaperScissorsManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
+ def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.RockPaperScissorsManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
     IO.puts("HANDLE EVENT game_answer")
     {res, winner} = TreasureHunt.RockPaperScissorsManager.update_answer(player, answer)
 
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
+
+    IO.puts(res)
+    IO.puts(winner)
+
     if res != :wait do
+
       broadcast_values = %{
         game_state: res,
         winner: winner
@@ -88,16 +102,20 @@ defmodule TreasureHuntWeb.GameArea do
     end
 
     if res == :win do
+      TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
+      IO.inspect(TreasureHunt.PlayerManager.get_player(player))
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
       TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
     end
 
     state = %{
       game_state: res,
-      winner: winner
+      winner: winner,
+      revealed_digits_count: revealed_digits_count
     }
     {:noreply, assign(socket, state)}
   end
+
 
   # handle broadcast on the general channel of the game area
   def handle_info(%{topic: "gamearea", event: "join", payload: payload}, socket) do
@@ -116,6 +134,8 @@ defmodule TreasureHuntWeb.GameArea do
       winner: nil,
       channel_name: Map.get(payload, :channel_name)
     }
+    #TreasureHuntWeb.Endpoint.broadcast_from(self(), "game_" <> opponent, "update_placeholders", state)
+
     {:noreply, assign(socket, state)}
   end
 
@@ -130,5 +150,21 @@ defmodule TreasureHuntWeb.GameArea do
     IO.puts("HANDLE INFO other: #{inspect(msg)}")
 
     {:noreply, socket}
+  end
+
+  # Handle rendering of digits
+  defp render_digits(random_number, revealed_digits_count) do
+    random_number
+      |> Integer.digits()
+      #|> Enum.reverse()
+      |> Enum.with_index()
+      |> Enum.map(fn {digit, index} ->
+        if index < revealed_digits_count do
+          Integer.to_string(digit)
+        else
+          "*"
+        end
+      end)
+      |> Enum.join(" ")
   end
 end

@@ -147,23 +147,6 @@ use Agent
         end
     end
 
-#    #Helper Function to find the next available opponent
-#    defp find_next_opponent(player_id, all_players) do
-#        # Might need modification (IDEA)
-#        available_opponents =
-#            Enum.filter(all_players, fn {id, state} ->
-#                id != player_id && Map.get(state, :opponent) == nil
-#            end)
-
-#        if length(available_opponents) > 0 do
-#            randomly_selected_opponent = Enum.random(available_opponents)
-#            {opponent_id, _} = randomly_selected_opponent
-#            {:ok, opponent_id}
-#        else
-#            {:error, "No available opponents"}
-#        end
-#    end
-
     # Initiate Guessing Number Game
     defp initiate_guessing_number(player_id, opponent_id) do 
         IO.puts("Initiating Guessing Number between #{player_id} and #{opponent_id}")

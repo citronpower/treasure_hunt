@@ -2,9 +2,12 @@
 <h1>Welcome in the game server!</h1>
 <p>Your fancy name is: <%= @player %></p>
 
+
+
 <%= if ! @joined do %>
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
 <% end %>
+
 
 <%= if @game == "TreasureHunt.RockPaperScissorsManager" do %>
 
@@ -14,7 +17,9 @@
 
 <%= if @winner != nil do %>
 <p><%= @winner %> won the round!</p>
+<p>Next unrevealed digit: </p>
 <% end %>
+
 <div class="game-buttons-container">
 <button class="game-button" phx-click="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name} phx-value-answer="rock" >
 <i class="fa-solid fa-hand-back-fist"></i>
@@ -27,6 +32,7 @@
 </button>
 </div>
 <% end %>
+
 <%= if @game_state == :wait do %>
 <p>Waiting for opponent to play...</p>
 <% end %>
@@ -42,6 +48,10 @@
 <% end %>
 
 <%= if @joined do %>
+
+<p>Your random number is: <%= render_digits(@random_number, @revealed_digits_count) %></p>
+<p>Your revealed_digits_count is: <%= @revealed_digits_count %> </p>
+
 <table>
   <thead>
     <tr>
@@ -55,7 +65,7 @@
       <%= if key != @player do %>
           <tr>
             <td><%= key %></td>
-            <td><%= value %></td>
+            <td><%= value.random_number %></td>
             <td>
               <button class="challenge-button" phx-click="new_challenge" phx-value-player={@player} phx-value-opponent={key} >
                 <i class="fa-solid fa-dungeon" ></i>
