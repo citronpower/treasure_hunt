@@ -207,7 +207,7 @@
 
   <%= if @game_state == :nomatch and @player == @winner do %>
 
-    <p>Your opponent guessed nothing, the word looks like this <%= @word %> !</p>
+    <p>Your opponent tried <%= @last_try %> and it is not part of the word, the word looks like this <%= @word %> !</p>
     <div class="game-input-container">
       <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
         <label>Try to guess a letter or enter "try" if you think you know the word:
@@ -226,7 +226,7 @@
   <% end %>
 
   <%= if @game_state == :nomatch and @player != @winner do %>
-    <p>You found nothing... The word looks like this <%= @word %>! </p>
+    <p>You didn't get any chance on that try... The word looks like this <%= @word %>! </p>
     <p>Waiting for opponent to play...</p>
   <% end %>
 

@@ -104,7 +104,7 @@ defmodule TreasureHuntWeb.GameArea do
     if res == :win do
       TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
       # Implement Game Over scenario
-      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
       end
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
@@ -147,7 +147,7 @@ defmodule TreasureHuntWeb.GameArea do
       TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
 
       # Implement Game Over scenario
-      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
       end
 
@@ -186,7 +186,7 @@ defmodule TreasureHuntWeb.GameArea do
     if res == :win do
     TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
     # Implement Game Over scenario
-      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
       end
 
@@ -216,14 +216,15 @@ defmodule TreasureHuntWeb.GameArea do
     revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
 
     IO.puts "game area player is #{player}"
-    {res, winner, word} = TreasureHunt.HangmanManager.update_answer(player, answer)
+    {res, winner, word,last_try} = TreasureHunt.HangmanManager.update_answer(player, answer)
 
     if res != :win do
 
       broadcast_values = %{
         game_state: res,
         winner: winner,
-        word: word
+        word: word,
+        last_try: last_try
       }
 
       TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
@@ -232,7 +233,7 @@ defmodule TreasureHuntWeb.GameArea do
     if res == :win do
       TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
       # Implement Game Over scenario
-      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
       end
 

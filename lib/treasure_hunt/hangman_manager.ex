@@ -65,12 +65,12 @@ defmodule TreasureHunt.HangmanManager do
 
     case player_current_answer == "try" do
       true ->
-        {:guess,player,word}
+        {:guess,player,word,false}
       _ ->
         case player_current_answer == random_word do
           true ->
             TreasureHunt.HangmanManager.reset_values(player_one,player_two)
-            {:win,player,random_word}
+            {:win,player,random_word,false}
           _ ->
             updated_word = TreasureHunt.HangmanManager.check_letter(player_current_answer,random_word,word)
 
@@ -108,24 +108,24 @@ defmodule TreasureHunt.HangmanManager do
                 case current_player do
                   "player_one" ->
                     IO.puts "case player is player one nomatch"
-                    {:nomatch,player_two,word}
+                    {:nomatch,player_two,word,player_current_answer}
                   "player_two" ->
                     IO.puts "case player is player two nomatch"
-                    {:nomatch,player_one,word}
+                    {:nomatch,player_one,word,player_current_answer}
                 end
               _ ->
                 case updated_word == random_word do
                   true ->
                     TreasureHunt.HangmanManager.reset_values(player_one,player_two)
-                    {:win,player,updated_word}
+                    {:win,player,updated_word,false}
                   _ ->
                     case current_player do
                       "player_one" ->
                         IO.puts "case player is player one HAS match"
-                        {:match,player_two,updated_word}
+                        {:match,player_two,updated_word,player_current_answer}
                       "player_two" ->
                         IO.puts "case player is player two HAS match"
-                        {:match,player_one,updated_word}
+                        {:match,player_one,updated_word,player_current_answer}
                     end
                 end
             end
