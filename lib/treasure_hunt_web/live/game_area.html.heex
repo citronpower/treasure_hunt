@@ -185,7 +185,7 @@
   <%= if @game_state == :ok and @player == @player_one do %>
   <div class="game-input-container">
     <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
-      <label>Try to guess a letter or enter "try" if you think you know the word:
+      <label>Try to guess a letter or write "try" if you think you know the word:
         <input 
           id="msg"
           type="text"
@@ -210,7 +210,7 @@
     <p>Your opponent tried <%= @last_try %> and it is not part of the word, the word looks like this <%= @word %> !</p>
     <div class="game-input-container">
       <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
-        <label>Try to guess a letter or enter "try" if you think you know the word:
+        <label>Try to guess a letter or write "try" if you think you know the word:
           <input 
             id="msg"
             type="text"
@@ -226,7 +226,7 @@
   <% end %>
 
   <%= if @game_state == :nomatch and @player != @winner do %>
-    <p>You didn't get any chance on that try... The word looks like this <%= @word %>! </p>
+    <p>You didn't get any chance on that try... The word looks like this <%= @word %> ! </p>
     <p>Waiting for opponent to play...</p>
   <% end %>
 
@@ -235,7 +235,7 @@
   <p>Your opponent found a letter! The word now looks like this <%= @word %> !</p>
   <div class="game-input-container">
     <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
-      <label>Try to guess a letter or enter "try" if you think you know the word:
+      <label>Try to guess a letter or write "try" if you think you know the word:
         <input 
           id="msg"
           type="text"
@@ -251,7 +251,7 @@
   <% end %>
 
   <%= if @game_state == :match and @player != @winner do %>
-    <p>You found a letter ! The word now looks like this <%= @word %>! </p>
+    <p>You found a letter ! The word now looks like this <%= @word %> ! </p>
     <p>Waiting for opponent to play...</p>
   <% end %>
 
@@ -260,7 +260,7 @@
   <p>Ok, do you have what it takes to guess the word ? It currently looks like this: <%= @word %> !</p>
   <div class="game-input-container">
     <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
-      <label>Try to guess a single word:
+      <label>So what will your try be like ? :
         <input 
           id="msg"
           type="text"
