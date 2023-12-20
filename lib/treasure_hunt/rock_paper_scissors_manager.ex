@@ -53,7 +53,7 @@ defmodule TreasureHunt.RockPaperScissorsManager do
           false ->
             player_one_values = Map.put(player_one_values, :score, player_one_score)
             Agent.update(__MODULE__, &(Map.put(&1, player_one, player_one_values)))
-            {:win, player_one}
+            {:ok, player_one}
         end
       :player_two ->
         player_two_score = player_two_score + 1
@@ -65,7 +65,7 @@ defmodule TreasureHunt.RockPaperScissorsManager do
           false ->
             player_two_values = Map.put(player_two_values, :score, player_two_score)
             Agent.update(__MODULE__, &(Map.put(&1, player_two, player_two_values)))
-            {:win, player_two}
+            {:ok, player_two}
         end
 
       :tie ->

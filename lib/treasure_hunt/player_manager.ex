@@ -42,13 +42,16 @@ defmodule TreasureHunt.PlayerManager do
   def inc_player_revealed_digits_count(player_name) do
     update_player(player_name, fn player ->
       old_count = Map.get(player, :revealed_digits_count, 0)
-      #IO.inspect("Old Count for player #{player_name}: #{old_count}")
 
       new_count = old_count + 1
       updated_player = Map.put(player, :revealed_digits_count, new_count)
-      #IO.inspect("Incrementing revealed_digits_count for player #{player_name} to #{new_count}")
 
       updated_player
     end)
-  end  
+  end
+
+  def player_below_revealed_digits_limit?(player_name) do
+      revealed_digits_count = get_player_revealed_digits_count(player_name)
+      revealed_digits_count >= 4
+  end
 end

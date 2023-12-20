@@ -15,6 +15,7 @@ defmodule TreasureHuntWeb.GameArea do
       revealed_digits_count: 0,
       joined: false,
       game: false,
+      game_won: false
     }
 
     {:ok, assign(socket, state)}
@@ -91,9 +92,6 @@ defmodule TreasureHuntWeb.GameArea do
 
     revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
 
-    IO.puts(res)
-    IO.puts(winner)
-
     if res != :wait do
 
       broadcast_values = %{
@@ -105,7 +103,10 @@ defmodule TreasureHuntWeb.GameArea do
 
     if res == :win do
       TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
-      IO.inspect(TreasureHunt.PlayerManager.get_player(player))
+      # Implement Game Over scenario
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+        IO.puts("Game Over!")
+      end
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
       TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
     end
@@ -118,9 +119,11 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
-  # handle the click on the start button of dice game
+# handle the click on the start button of dice game
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.DiceManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
     IO.puts("HANDLE EVENT game_answer")
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
+
     answer =
     case answer do
       "go" ->
@@ -141,13 +144,21 @@ defmodule TreasureHuntWeb.GameArea do
     end
 
     if res == :win do
+      TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
+
+      # Implement Game Over scenario
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+        IO.puts("Game Over!")
+      end
+
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
       TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
     end
 
     state = %{
       game_state: res,
-      winner: winner
+      winner: winner,
+      revealed_digits_count: revealed_digits_count
     }
     {:noreply, assign(socket, state)}
   end
@@ -155,6 +166,8 @@ defmodule TreasureHuntWeb.GameArea do
   #handle the input in the guess_the_number game
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.GuessTheNumberManager", "player" => player, "channel_name" => channel_name}, socket) do
     IO.puts("HANDLE EVENT game_answer")
+
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
 
     IO.puts "game area player is #{player}"
     {res, winner, guessed_number} = TreasureHunt.GuessTheNumberManager.update_answer(player, answer)
@@ -171,6 +184,12 @@ defmodule TreasureHuntWeb.GameArea do
     end
 
     if res == :win do
+    TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
+    # Implement Game Over scenario
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+        IO.puts("Game Over!")
+      end
+
       broadcast_values = %{
         game_state: res,
         winner: winner,
@@ -185,7 +204,8 @@ defmodule TreasureHuntWeb.GameArea do
     state = %{
       game_state: res,
       winner: winner,
-      number: guessed_number
+      number: guessed_number,
+      revealed_digits_count: revealed_digits_count
     }
     {:noreply, assign(socket, state)}
   end
@@ -193,6 +213,7 @@ defmodule TreasureHuntWeb.GameArea do
   #handle the input in the hangman game
   def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.HangmanManager", "player" => player, "channel_name" => channel_name}, socket) do
     IO.puts("HANDLE EVENT game_answer")
+    revealed_digits_count = TreasureHunt.PlayerManager.get_player_revealed_digits_count(player)
 
     IO.puts "game area player is #{player}"
     {res, winner, word} = TreasureHunt.HangmanManager.update_answer(player, answer)
@@ -209,6 +230,12 @@ defmodule TreasureHuntWeb.GameArea do
     end
 
     if res == :win do
+      TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
+      # Implement Game Over scenario
+      if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do 
+        IO.puts("Game Over!")
+      end
+
       broadcast_values = %{
         game_state: res,
         winner: winner,
@@ -223,7 +250,8 @@ defmodule TreasureHuntWeb.GameArea do
     state = %{
       game_state: res,
       winner: winner,
-      word: word
+      word: word,
+      revealed_digits_count: revealed_digits_count
     }
     {:noreply, assign(socket, state)}
   end
@@ -259,6 +287,14 @@ defmodule TreasureHuntWeb.GameArea do
   def handle_info(%{topic: "game_" <> opponent, event: "game_answer", payload: payload}, socket) do
     IO.puts("HANDLE INFO game_answer: #{inspect(payload)}")
 
+    # Retrieve the player from the socket assigns
+    #player = socket.assigns.player
+
+    # Update the state with the new revealed_digits_count
+    #state = %{
+     # revealed_digits_count: TreasureHunt.PlayerManager.get_player_revealed_digits_count(player),
+     # game_won: Map.get(payload, :game_state) == :win
+    #}
     {:noreply, assign(socket, payload)}
   end
 
