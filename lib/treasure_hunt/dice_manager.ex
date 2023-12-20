@@ -33,7 +33,6 @@ defmodule TreasureHunt.DiceManager do
     player_two_current_answer = player_two_values |> Map.get(:current_answer)
 
     result = TreasureHunt.DiceManager.compare_results(player_one_current_answer,player_two_current_answer)
-    IO.puts "result of #{player_one} #{player_one_current_answer} and #{player_two} #{player_two_current_answer}"
     value1 = player_one_current_answer
     value2 = player_two_current_answer
     case result do
@@ -46,10 +45,6 @@ defmodule TreasureHunt.DiceManager do
       "tie" ->
         {:tie,"nobody"}
     end
-    # player_one_values = Map.put(player_one_values, :current_answer, false)
-    # player_two_values = Map.put(player_two_values, :current_answer, false)
-
-
   end
 
  def update_answer(player, answer) do
@@ -57,7 +52,6 @@ defmodule TreasureHunt.DiceManager do
 
     player_values = Agent.get(__MODULE__, &(Map.get(&1, player)))
     player_values = Map.put(player_values, :current_answer, answer)
-    #IO.puts inspect(player_values)
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
     Agent.update(__MODULE__, &(Map.put(&1, :turn, Map.get(&1, :turn) + 1)))
 
@@ -79,16 +73,11 @@ defmodule TreasureHunt.DiceManager do
       {_, nil} ->
         IO.puts("Waiting for Player 2 to roll.")
       {p1, p2} when p1 > p2 ->
-        IO.puts("Player 1 wins with a roll of #{p1}!")
         "player_one"
       {p1, p2} when p2 > p1 ->
-        IO.puts("Player 2 wins with a roll of #{p2}!")
         "player_two"
       {p1, p2} when p1 == p2 ->
-        IO.puts("It's a tie! Both players rolled #{p1}.")
         "tie"
     end
   end
-
-
 end

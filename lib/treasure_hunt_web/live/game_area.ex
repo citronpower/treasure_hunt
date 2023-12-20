@@ -266,12 +266,6 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
-#  def handle_event("back_to_gamearea", %{"player" => player}, socket) do
-#    IO.puts(inspect(player))
-#    TreasureHunt.PlayerManager.add_player(player)
-#    TreasureHuntWeb.Endpoint.broadcast(player, "message", %{win: false})
-#    {:noreply, socket}
-#  end
 
   # handle broadcast on the general channel of the game area
   def handle_info(%{topic: "gamearea", event: "join", payload: payload}, socket) do
@@ -303,14 +297,6 @@ defmodule TreasureHuntWeb.GameArea do
   def handle_info(%{topic: "game_" <> opponent, event: "game_answer", payload: payload}, socket) do
     IO.puts("HANDLE INFO game_answer: #{inspect(payload)}")
 
-    # Retrieve the player from the socket assigns
-    #player = socket.assigns.player
-
-    # Update the state with the new revealed_digits_count
-    #state = %{
-     # revealed_digits_count: TreasureHunt.PlayerManager.get_player_revealed_digits_count(player),
-     # game_won: Map.get(payload, :game_state) == :win
-    #}
     {:noreply, assign(socket, payload)}
   end
 

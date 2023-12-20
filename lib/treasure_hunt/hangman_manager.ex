@@ -9,7 +9,6 @@ defmodule TreasureHunt.HangmanManager do
     random_word = choose_random_word(Path.join([__DIR__, "wordlist.txt"]))
     length = length = String.length(random_word)
     word = String.duplicate(".", length)
-    IO.puts "random word is #{random_word}"
 
     Agent.start_link(fn -> %{:players =>[player_one, player_two],
                             player_one => %{
@@ -88,7 +87,6 @@ defmodule TreasureHunt.HangmanManager do
                 Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
             end
 
-            IO.puts "result of #{random_word} and #{player_current_answer} is #{updated_word}"
 
             case updated_word do
               "no_match" ->
@@ -107,10 +105,8 @@ defmodule TreasureHunt.HangmanManager do
                 end
                 case current_player do
                   "player_one" ->
-                    IO.puts "case player is player one nomatch"
                     {:nomatch,player_two,word,player_current_answer}
                   "player_two" ->
-                    IO.puts "case player is player two nomatch"
                     {:nomatch,player_one,word,player_current_answer}
                 end
               _ ->
@@ -121,10 +117,8 @@ defmodule TreasureHunt.HangmanManager do
                   _ ->
                     case current_player do
                       "player_one" ->
-                        IO.puts "case player is player one HAS match"
                         {:match,player_two,updated_word,player_current_answer}
                       "player_two" ->
-                        IO.puts "case player is player two HAS match"
                         {:match,player_one,updated_word,player_current_answer}
                     end
                 end
@@ -149,7 +143,6 @@ defmodule TreasureHunt.HangmanManager do
     player_values = Map.put(player_values, :current_answer, answer)
     Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
 
-    IO.puts inspect(player_values)
     updated_results = TreasureHunt.HangmanManager.update_results(player)
 
     updated_results

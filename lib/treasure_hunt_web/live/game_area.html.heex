@@ -1,6 +1,13 @@
 <div class="live-view-container">
 <h1>Welcome in the game server!</h1>
 <p>Your fancy name is: <%= @player %></p>
+<br/>
+<div style="border: 2px solid green; padding: 10px; background-color: #f0f8ff;">
+  <p>This is a treasure hunt where you have to find all four digits of your secret code in order for the treasure to be revealed!</p>
+  <p>To get those digits, you have to challenge your fellow treasure hunters and win four mini-games generated randomly. Simply press the button next to the other players to challenge them.</p>
+  <p>Now, best of luck in your adventure!</p>
+</div>
+
 
 <%= if ! @win  do %>
 
@@ -18,7 +25,6 @@
 
 <%= if @winner != nil do %>
 <p><%= @winner %> won the round!</p>
-<p>Next unrevealed digit: </p>
 <% end %>
 
 <div class="game-buttons-container">
@@ -295,8 +301,7 @@
 
 <%= if @joined do %>
 
-<p>Your random number is: <%= render_digits(@random_number, @revealed_digits_count) %></p>
-<!--<p>Your revealed_digits_count is: <%= @revealed_digits_count %> </p>-->
+<p>Your secret code is: <%= render_digits(@random_number, @revealed_digits_count) %></p>
 
 <table>
   <thead>
@@ -330,7 +335,15 @@
 
 <%= if @win do %>
 <p>Youhouuuuu! You are a real treasure hunter!</p>
-<button class="button" phx-click="join" phx-value-player={@player} >WANT TO PLAY AGAIN?</button>
-<% end %>
 
+<br/>
+
+<div style="text-align: center;">
+  <iframe src="https://giphy.com/embed/FerjqPHY2OGDPJPwEk" width="480" height="400" frameborder="0" class="giphy-embed" allowfullscreen style="margin: auto;"></iframe>
+</div>
+<p style="text-align: center;"><a href="https://giphy.com/gifs/theoffice-nbc-the-office-tv-FerjqPHY2OGDPJPwEk">via GIPHY</a></p>
+
+
+<button class="small-game-button" phx-click="join" phx-value-player={@player} >WANT TO PLAY AGAIN?</button>
+<% end %>
 </div>

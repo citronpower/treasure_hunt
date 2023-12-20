@@ -55,7 +55,6 @@ defmodule TreasureHunt.GuessTheNumberManager do
     random_number = player_values |> Map.get(:random_number)
 
     result = TreasureHunt.GuessTheNumberManager.compare_number(random_number,player_current_answer)
-    #IO.puts "result of #{random_number} and #{player_current_answer} is #{result}"
 
     case result do
       "equal" ->
@@ -64,22 +63,16 @@ defmodule TreasureHunt.GuessTheNumberManager do
       "lower" ->
         case current_player do
           "player_one" ->
-            IO.puts "case player is player one lower"
             {:lower,player_two,player_current_answer}
           "player_two" ->
-            IO.puts "case player is player two lower"
             {:lower,player_one,player_current_answer}
         end
 
       "bigger" ->
-        IO.puts "player one is #{player_one}"
-        IO.puts "player two is #{player_two}"
         case current_player do
           "player_one" ->
-            IO.puts "case player is player one bigger"
             {:bigger,player_two,player_current_answer}
           "player_two" ->
-            IO.puts "case player is player two bigger"
             {:bigger,player_one,player_current_answer}
           _ ->
             "no match man :("
