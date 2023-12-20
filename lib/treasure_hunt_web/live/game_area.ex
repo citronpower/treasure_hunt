@@ -78,7 +78,7 @@ defmodule TreasureHuntWeb.GameArea do
       game: inspect(game),
       game_state: :ok,
       winner: nil,
-      revealed_digits_count: revealed_digits_count
+      revealed_digits_count: revealed_digits_count,
       player_one: player,
       player_two: opponent
     }
@@ -283,5 +283,4 @@ defmodule TreasureHuntWeb.GameArea do
       end)
       |> Enum.join(" ")
   end
-end
 end
