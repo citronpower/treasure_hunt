@@ -14,7 +14,7 @@ defmodule TreasureHuntWeb.GameArea do
       random_number: nil,
       revealed_digits_count: 0,
       joined: false,
-      game: false
+      game: false,
     }
 
     {:ok, assign(socket, state)}
@@ -79,6 +79,8 @@ defmodule TreasureHuntWeb.GameArea do
       game_state: :ok,
       winner: nil,
       revealed_digits_count: revealed_digits_count
+      player_one: player,
+      player_two: opponent
     }
     {:noreply, assign(socket, state)}
   end
@@ -116,6 +118,116 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+  # handle the click on the start button of dice game
+  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.DiceManager", "player" => player, "channel_name" => channel_name, "value" => _}, socket) do
+    IO.puts("HANDLE EVENT game_answer")
+    answer =
+    case answer do
+      "go" ->
+        IO.puts "Hello me in changing answer"
+        :rand.uniform(6)
+      _ ->
+        answer
+    end
+    IO.puts "answer is #{answer}"
+    {res, winner} = TreasureHunt.DiceManager.update_answer(player, answer)
+
+    if res != :wait do
+      broadcast_values = %{
+        game_state: res,
+        winner: winner
+      }
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+    end
+
+    if res == :win do
+      TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
+      TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
+    end
+
+    state = %{
+      game_state: res,
+      winner: winner
+    }
+    {:noreply, assign(socket, state)}
+  end
+
+  #handle the input in the guess_the_number game
+  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.GuessTheNumberManager", "player" => player, "channel_name" => channel_name}, socket) do
+    IO.puts("HANDLE EVENT game_answer")
+
+    IO.puts "game area player is #{player}"
+    {res, winner, guessed_number} = TreasureHunt.GuessTheNumberManager.update_answer(player, answer)
+
+    if res != :win do
+
+      broadcast_values = %{
+        game_state: res,
+        winner: winner,
+        number: guessed_number
+      }
+
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+    end
+
+    if res == :win do
+      broadcast_values = %{
+        game_state: res,
+        winner: winner,
+        number: guessed_number
+      }
+
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+      TreasureHuntWeb.Endpoint.unsubscribe(channel_name)
+      TreasureHuntWeb.Endpoint.subscribe("game_" <> player)
+    end
+
+    state = %{
+      game_state: res,
+      winner: winner,
+      number: guessed_number
+    }
+    {:noreply, assign(socket, state)}
+  end
+
+  #handle the input in the hangman game
+  def handle_event("game_answer", %{"answer" => answer, "game" => "TreasureHunt.HangmanManager", "player" => player, "channel_name" => channel_name}, socket) do
+    IO.puts("HANDLE EVENT game_answer")
+
+    IO.puts "game area player is #{player}"
+    {res, winner, word} = TreasureHunt.HangmanManager.update_answer(player, answer)
+
+    if res != :win do
+
+      broadcast_values = %{
+        game_state: res,
+        winner: winner,
+        word: word
+      }
+
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+    end
+
+    if res == :win do
+      broadcast_values = %{
+        game_state: res,
+        winner: winner,
+        word: word
+      }
+
+      TreasureHuntWeb.Endpoint.broadcast_from(self(), channel_name, "game_answer", broadcast_values)
+      TreasureHuntWeb.Endpoint.unsubscribe(channel_name)
+      TreasureHuntWeb.Endpoint.subscribe("game_" <> player)
+    end
+
+    state = %{
+      game_state: res,
+      winner: winner,
+      word: word
+    }
+    {:noreply, assign(socket, state)}
+  end
+
 
   # handle broadcast on the general channel of the game area
   def handle_info(%{topic: "gamearea", event: "join", payload: payload}, socket) do
@@ -128,11 +240,15 @@ defmodule TreasureHuntWeb.GameArea do
   def handle_info(%{topic: "game_" <> opponent, event: "enter_challenge", payload: payload}, socket) do
     IO.puts("HANDLE INFO enter_challenge: #{inspect(payload)}")
 
+    IO.puts inspect(payload)
+
     state = %{
       game: inspect(Map.get(payload, :game)),
       game_state: :ok,
       winner: nil,
-      channel_name: Map.get(payload, :channel_name)
+      channel_name: Map.get(payload, :channel_name),
+      player_one: Map.get(payload, :player_one),
+      player_two: Map.get(payload, :player_two)
     }
     #TreasureHuntWeb.Endpoint.broadcast_from(self(), "game_" <> opponent, "update_placeholders", state)
 
@@ -167,4 +283,5 @@ defmodule TreasureHuntWeb.GameArea do
       end)
       |> Enum.join(" ")
   end
+end
 end
