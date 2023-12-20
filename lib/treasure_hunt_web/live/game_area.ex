@@ -19,7 +19,8 @@ defmodule TreasureHuntWeb.GameArea do
       revealed_digits_count: 0,
       joined: false,
       game: false,
-      game_won: false
+      game_won: false,
+      win: false
     }
 
     {:ok, assign(socket, state)}
@@ -48,7 +49,8 @@ defmodule TreasureHuntWeb.GameArea do
       random_number: random_number,
       revealed_digits_count: revealed_digits_count,
       players: players,
-      joined: true
+      joined: true,
+      win: false
     }
 
     TreasureHuntWeb.Endpoint.broadcast_from(self(), @topic, "join", state)
@@ -106,12 +108,14 @@ defmodule TreasureHuntWeb.GameArea do
 
     if res == :win do
       TreasureHunt.PlayerManager.inc_player_revealed_digits_count(winner)
+
+      TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{revealed_digits_count:
+        TreasureHunt.PlayerManager.get_player_revealed_digits_count(winner)})
       # Implement Game Over scenario
       if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
+        TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{win: true})
       end
-      TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{revealed_digits_count:
-        TreasureHunt.PlayerManager.get_player_revealed_digits_count(winner)})
 
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
       TreasureHuntWeb.Endpoint.subscribe("game_" <> player) # "player" need to always be connected to channel game_"player"
@@ -153,6 +157,7 @@ defmodule TreasureHuntWeb.GameArea do
       # Implement Game Over scenario
       if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
+        TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{win: true})
       end
       TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{revealed_digits_count: TreasureHunt.PlayerManager.get_player_revealed_digits_count(winner)})
       TreasureHuntWeb.Endpoint.unsubscribe(channel_name) # the player that initiated the game need to unsubscribe
@@ -189,6 +194,7 @@ defmodule TreasureHuntWeb.GameArea do
     # Implement Game Over scenario
       if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
+        TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{win: true})
       end
 
       TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{revealed_digits_count: TreasureHunt.PlayerManager.get_player_revealed_digits_count(winner)})
@@ -236,6 +242,7 @@ defmodule TreasureHuntWeb.GameArea do
       # Implement Game Over scenario
       if TreasureHunt.PlayerManager.player_below_revealed_digits_limit?(winner) do
         IO.puts("Game Over!")
+        TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{win: true})
       end
 
       TreasureHuntWeb.Endpoint.broadcast(winner, "message", %{revealed_digits_count: TreasureHunt.PlayerManager.get_player_revealed_digits_count(winner)})
@@ -259,6 +266,12 @@ defmodule TreasureHuntWeb.GameArea do
     {:noreply, assign(socket, state)}
   end
 
+#  def handle_event("back_to_gamearea", %{"player" => player}, socket) do
+#    IO.puts(inspect(player))
+#    TreasureHunt.PlayerManager.add_player(player)
+#    TreasureHuntWeb.Endpoint.broadcast(player, "message", %{win: false})
+#    {:noreply, socket}
+#  end
 
   # handle broadcast on the general channel of the game area
   def handle_info(%{topic: "gamearea", event: "join", payload: payload}, socket) do

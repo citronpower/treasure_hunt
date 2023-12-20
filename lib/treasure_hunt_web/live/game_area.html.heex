@@ -2,7 +2,7 @@
 <h1>Welcome in the game server!</h1>
 <p>Your fancy name is: <%= @player %></p>
 
-
+<%= if ! @win  do %>
 
 <%= if ! @joined do %>
 <button class="challenge-button" phx-click="join" phx-value-player={@player}>JOIN THE GAME !</button>
@@ -323,6 +323,14 @@
   </tbody>
 </table>
 
+<% end %>
+
+<% end %>
+
+
+<%= if @win do %>
+<p>Youhouuuuu! You are a real treasure hunter!</p>
+<button class="button" phx-click="join" phx-value-player={@player} >WANT TO PLAY AGAIN?</button>
 <% end %>
 
 </div>
