@@ -316,7 +316,6 @@ defmodule TreasureHuntWeb.GameArea do
   defp render_digits(random_number, revealed_digits_count) do
     random_number
       |> Integer.digits()
-      #|> Enum.reverse()
       |> Enum.with_index()
       |> Enum.map(fn {digit, index} ->
         if index < revealed_digits_count do
