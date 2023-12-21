@@ -236,6 +236,31 @@
     <p>Waiting for opponent to play...</p>
   <% end %>
 
+  <%= if @game_state == :badtry and @player == @winner do %>
+
+    <p>Your opponent tried <%= @last_try %> and it was not the right word, the word still looks like this <%= @word %> !</p>
+    <div class="game-input-container">
+      <form phx-submit="game_answer" phx-value-game={@game} phx-value-player={@player} phx-value-channel_name={@channel_name}>
+        <label>Try to guess a letter or write "try" if you think you know the word:
+          <input 
+            id="msg"
+            type="text"
+            name="answer"
+            pattern="[a-zA-Z]|try"
+            title="Please enter a single letter or 'try'"
+            required />
+        </label>
+        <button class="small-game-button">Submit</button>
+      </form>
+    </div>
+
+  <% end %>
+
+  <%= if @game_state == :badtry and @player != @winner do %>
+    <p>You didn't get the right word... The word still looks like this <%= @word %> ! </p>
+    <p>Waiting for opponent to play...</p>
+  <% end %>
+
   <%= if @game_state == :match and @player == @winner do %>
 
   <p>Your opponent found a letter! The word now looks like this <%= @word %> !</p>

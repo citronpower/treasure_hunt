@@ -71,57 +71,73 @@ defmodule TreasureHunt.HangmanManager do
             TreasureHunt.HangmanManager.reset_values(player_one,player_two)
             {:win,player,random_word,false}
           _ ->
-            updated_word = TreasureHunt.HangmanManager.check_letter(player_current_answer,random_word,word)
+            case String.length(player_current_answer) >= 2 do
+              true ->
+                case current_player do
+                  "player_one" ->
+                    {:badtry,player_two,word,player_current_answer}
+                  "player_two" ->
+                    {:badtry,player_one,word,player_current_answer}
+                end
+                _ ->
+                  updated_word = TreasureHunt.HangmanManager.check_letter(player_current_answer,random_word,word)
 
-            player_values = Map.put(player_values, :word, updated_word)
-            Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+                  player_values = Map.put(player_values, :word, updated_word)
+                  Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
 
-            case current_player do
-              "player_one" ->
-                player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
-                player2_values = Map.put(player2_values, :word, updated_word)
-                Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
-              "player_two" ->
-                player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
-                player2_values = Map.put(player2_values, :word, updated_word)
-                Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
+                  case current_player do
+                    "player_one" ->
+                      player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
+                      player2_values = Map.put(player2_values, :word, updated_word)
+                      Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
+                    "player_two" ->
+                      player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
+                      player2_values = Map.put(player2_values, :word, updated_word)
+                      Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
+                  end
+
+
+                  case updated_word do
+                    "no_match" ->
+                      player_values = Map.put(player_values, :word, word)
+                      Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
+
+                      case current_player do
+                        "player_one" ->
+                          player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
+                          player2_values = Map.put(player2_values, :word, word)
+                          Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
+                        "player_two" ->
+                          player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
+                          player2_values = Map.put(player2_values, :word, word)
+                          Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
+                      end
+                      case current_player do
+                        "player_one" ->
+                          {:nomatch,player_two,word,player_current_answer}
+                        "player_two" ->
+                          {:nomatch,player_one,word,player_current_answer}
+                      end
+                    _ ->
+                      case updated_word == random_word do
+                        true ->
+                          TreasureHunt.HangmanManager.reset_values(player_one,player_two)
+                          {:win,player,updated_word,false}
+                        _ ->
+                          case current_player do
+                            "player_one" ->
+                              {:match,player_two,updated_word,player_current_answer}
+                            "player_two" ->
+                              {:match,player_one,updated_word,player_current_answer}
+                          end
+                      end
+
             end
 
 
-            case updated_word do
-              "no_match" ->
-                player_values = Map.put(player_values, :word, word)
-                Agent.update(__MODULE__, &(Map.put(&1, player, player_values)))
 
-                case current_player do
-                  "player_one" ->
-                    player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_two)))
-                    player2_values = Map.put(player2_values, :word, word)
-                    Agent.update(__MODULE__, &(Map.put(&1, player_two, player2_values)))
-                  "player_two" ->
-                    player2_values = Agent.get(__MODULE__, &(Map.get(&1,player_one)))
-                    player2_values = Map.put(player2_values, :word, word)
-                    Agent.update(__MODULE__, &(Map.put(&1, player_one, player2_values)))
-                end
-                case current_player do
-                  "player_one" ->
-                    {:nomatch,player_two,word,player_current_answer}
-                  "player_two" ->
-                    {:nomatch,player_one,word,player_current_answer}
-                end
-              _ ->
-                case updated_word == random_word do
-                  true ->
-                    TreasureHunt.HangmanManager.reset_values(player_one,player_two)
-                    {:win,player,updated_word,false}
-                  _ ->
-                    case current_player do
-                      "player_one" ->
-                        {:match,player_two,updated_word,player_current_answer}
-                      "player_two" ->
-                        {:match,player_one,updated_word,player_current_answer}
-                    end
-                end
+
+
             end
 
 
